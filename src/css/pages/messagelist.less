@@ -1,0 +1,72 @@
+/* ----------------------scroll common------------ */
+.preloader{ 
+  position: absolute;
+  left: 0;
+  z-index: 0;
+  color: #fff;
+  text-align: center;
+  line-height: 1rem;
+  height: 1rem;
+  top:1rem;
+  width: 100%;
+  opacity: 0;
+  -webkit-transition: 300ms;
+  -moz-transition: 300ms;
+  -ms-transition: 300ms;
+  -o-transition: 300ms;
+  transition: 300ms;
+  background: rgba(0,0,0,0.1);
+}
+.visible {
+  top: 0.9rem;
+  z-index:20;
+  opacity: 1;
+}
+.prebottom.visible_bottom {
+    bottom:1.12rem;
+    z-index:20;
+    opacity: 1;
+}
+.swiper-container {
+  width: 100%;
+  color: #fff;
+  z-index: 10;
+  overflow:hidden;
+}
+.red-slide {
+  background: #ca4040;
+}
+.blue-slide {
+  background: #4390ee;
+}
+.orange-slide {
+  background: #ff8604;
+}
+.green-slide {
+  background: #49a430;
+}
+.pink-slide {
+  background: #973e76;
+}
+.swiper-slide {
+  width: 100%;
+  overflow:hidden;
+}
+.swiper-slide-warpper>div{
+	float:left;
+}
+.swiper-slide-warpper .title {
+  font-style: italic;
+  font-size: .42rem;
+}
+
+
+/* ----------------------message page start------------ */
+.message_carouse{height:.80rem;margin-right:.20rem;float:left;}
+.message_carouse img{width:.80rem;height:.80rem;border-radius: 50%;}
+.message_list{position:relative;width:4.40rem;float:left;}
+.message_date{position: absolute;right:.05rem;top:.05rem;color:#c8ccd2;font-family: "PingFang SC Light",arial;}
+.message_nickname{color:#2E88CE;line-height:.42rem;}
+.message_nickname a{color:#2E88CE}
+.message_talk{white-space: nowrap;line-height:.33rem;overflow: hidden;text-overflow:ellipsis;color:#55637C}
+.goback a{display:block} 

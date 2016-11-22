@@ -1,0 +1,80 @@
+@import './layout/header.less';
+@import './layout/footer.less';
+@import './layout/list.less';
+@import './layout/info.less';
+@import './layout/form.less';
+.clear:after{
+    content:"";display:table;clear:both;
+}
+.hasScroll{
+    overflow:auto
+}
+.floatinner{
+    overflow: hidden;
+}
+.floatinner>div{
+    float:left;
+}
+.content-body{
+    margin-bottom:.56rem;
+}
+.container{
+    width:100%;
+    height:100%;
+}
+.tagContent .active{
+    display:block
+}
+.login_container{
+    background:#2b2c2c;
+    position: relative;
+}
+.login_logo{
+    background:url(../images/signup_background@2x.png) no-repeat center center;
+    background-size:6.4rem;
+    width:100%;
+    height:4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.logo{
+    width:1.8rem;
+    height:1rem;
+}
+.noborder{
+    border:none !important;
+}
+/*
+ *  @公共的icon
+ */
+.goback{
+    position:absolute;
+    left:.40rem;
+    top:.14rem;
+}
+.goback img,.chat-refresh img{
+    width:.52rem;
+    height:.52rem;
+} 
+.chat-refresh{
+    position:absolute;
+    right:.40rem;
+    top:.14rem;
+}
+.triangle-left {
+    width:0;
+    height:0;
+    border-top:.2rem solid transparent;
+    border-bottom:.2rem solid transparent;
+    border-right:.2rem solid #f3f3f3;
+    margin-top:.3rem;
+}
+.triangle-right {
+    width:0;
+    height:0;
+    border-top:.2rem solid transparent;
+    border-bottom:.2rem solid transparent;
+    border-left:.2rem solid #b2f074;
+    margin-top:.3rem;
+}

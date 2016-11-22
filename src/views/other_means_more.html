@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>电影指南-他人资料-更多</title>
+	<link type="text/css" href="/css/style.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width,target-densitydpi=device-dpi,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name=”format-detection” content=”telephone=no” />
+</head>
+
+<body>
+<div class="container flex-container flex-column">
+	<div class="border_bnt means_more_top">
+		<ul>
+			<li class="f_left">
+				<img src="../images/share_weibo.png" alt="">
+				<span class="font-normal">微博</span>
+			</li>
+			<li class="f_right">
+				<img src="../images/share_qqzone.png" alt="">
+				<span class="font-normal">空间</span>
+			</li>
+		</ul>
+		<ul>
+			<li class="f_left">
+				<img src="../images/share_weixin.png" alt="">
+				<span class="font-normal">朋友圈</span>
+			</li>
+			<li class="f_right">
+				<img src="../images/share_copyaddress.png" alt="">
+				<span class="font-normal">复制链接</span>
+			</li>
+		</ul>
+	</div>
+	<div class="flex-normal width64">
+	<h3 class="more_h3 font-title">
+		<div id="more_h3_user">举报用户</div>
+		<div class="more_h3_dis" id="more_h3_dis">
+			<span>广告或垃圾信息</span>
+			<span>抄袭或未授权转载</span>
+			<span>其他</span>
+		</div>
+	</h3>
+	<h3 class="more_h3" id="more_h3_blacklist">加入黑名单</h3>
+	<div class="mask" id="mask"></div>
+	<div class="pop" id="pop">
+		<div class="pop_top">
+			<h4 class="font-normal">确定要将<span>Clarice</span>加入黑名单？</h4>
+			<p class="font-normal">加入黑名单后，对方将不能关注你、给你发私信、@你、评论你的影评。</p>
+		</div>
+		<div class="pop_bnt font-bold">
+			<button type="text">取消</button>
+			<button type="text">确定</button>
+		</div>
+	</div>
+	</div>
+	<div id="footer">
+		@@include('footer.inc')
+	</div>
+</div>	
+	<script src="/js/common.js"></script>
+	<script src="../js/other_means_more.js" type="text/javascript"></script>
+</body>
+</html>
