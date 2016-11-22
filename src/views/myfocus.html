@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>用户-我关注的</title>
+    <link type="text/css" href="/css/style.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width,target-densitydpi=device-dpi,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name=”format-detection” content=”telephone=no” />
+</head>
+<body>
+    <div class="container flex-container flex-column">
+        <div class="mes_title fix_title font-title">
+            <div class="goback"><a href="javascript:;"><img src="../images/back.png" alt=""></a></div>
+            我关注的
+        </div>
+        <div class="swiper-container flex-normal" id="myfocus">
+            <div class="swiper-wrapper">
+            </div>
+        </div>
+        <div class="preloader prebottom">
+            Loading...
+        </div>
+        <div id="footer">
+            @@include('footer.inc')
+        </div>
+    </div>
+    <script src="/js/common.js"></script>
+    <script src="/js/myfocus.js" type="text/javascript"></script>
+</body>
+</html>

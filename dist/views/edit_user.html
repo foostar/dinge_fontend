@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>电影指南-我的</title>
+    <meta name="viewport" content="width=device-width,target-densitydpi=device-dpi,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name=”format-detection” content=”telephone=no” />
+    <link type="text/css" href="/css/style.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container flex-container flex-column">
+        <div class="mes_title font-title">
+            <div class="goback"><a href="javascript:;"><img src="../images/back.png" alt=""></a></div>
+            编辑资料
+        </div>
+        <div class="flex-normal">
+            <div class="edit_carouse" data-src="/images/carouse/head.png">
+                <div class="LUploader" id="upload_carouse">
+                    <div class="LUploader-container">
+                        <input id="carouse" data-LUploader='upload_carouse' data-user-id="base123" data-form-file='basestr' data-upload-type='front' type="file" />
+                        <ul class="LUploader-list"></ul>
+                    </div>
+                    <div>
+                        <div class="icon icon-camera font20"></div>
+                        <p></p>
+                    </div>
+                </div> 
+                <img id="user_carouse" src="/images/carouse/head.png"/>
+            </div>
+            <div class="edit_mes font-h" id="edituser">
+                <div class="edit_box edit_username">
+                    <div class="edit_label">昵称</div>
+                    <div class="edit_content_username">
+                        <input type="text" placeholder="请输入昵称">
+                    </div>
+                </div>
+                <div class="edit_box edit_sign">
+                    <div class="edit_label">签名</div>
+                    <div class="edit_content_sign">
+                        <div class="word_count"><span>0</span>/30</div>
+                        <textarea id="sign" placeholder="请介绍自己..."></textarea> 
+                    </div>
+                </div>
+                <div class="edit_box edit_arrow edit_sex">
+                    <div class="edit_label">性别</div>
+                    <div class="edit_content_sex"></div>
+                </div>
+                <div class="edit_box edit_arrow edit_zone">
+                    <div class="edit_label">城市</div>
+                    <div class="edit_content_zone">
+                        <input id="city" type="text" readonly="" placeholder="城市选择特效"  value="北京市,东城区"/>
+                        <input id="city_value" type="hidden" value="110000"/>
+                    </div>
+                </div>
+                <div class="edit_box edit_arrow edit_birthday">
+                    <div class="edit_label">生日</div>
+                    <div class="edit_content_birthday">
+                        <input id="birthday" type="text" readonly="" placeholder="日期选择特效" data-lcalendar="2016-05-11,2016-05-11" />
+                    </div>
+                </div>
+            </div>
+            <div class="edit_mask">
+                <div class="edit_modal_wrap">
+                    <div class="edit_modal">
+                        <div class="edit_modal_title">选择性别</div>
+                        <a href="javascript:;">男</a>
+                        <a href="javascript:;">女</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="footer">
+            <footer>
+    <ul class="footer flex-container">
+        <li class="flex-normal"><a href="home.html" class="sy_bg1 font-normal">首页</a></li>
+        <li class="flex-normal"><a href="search.html" class="fx_bg font-normal">发现</a></li>
+        <li class="flex-normal"><a href="messages.html" class="xx_bg font-normal">消息</a></li>
+        <li class="flex-normal"><a href="user.html" class="wd_bg font-normal">我的</a></li>
+    </ul>
+</footer> 
+        </div>
+    </div>
+    <script src="/js/common.js" type="text/javascript"></script>
+    <script src="/js/editUser.js" type="text/javascript"></script>
+</body>
+</html>

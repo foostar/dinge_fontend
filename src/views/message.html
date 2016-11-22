@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Demo</title>
+  <link type="text/css" href="/css/style.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width,target-densitydpi=device-dpi,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name=”format-detection” content=”telephone=no” />
+  <style>
+</style>
+</head>
+<body>
+    <div class="container flex-container flex-column">
+      <div class="mes_title fix_title">
+          <div class="goback"><img src="../images/back.png" alt=""></div>
+          <span class="mes_to">缺缺</span>
+          <div class="chat-refresh"><img src="../images/chat-refresh.png" alt=""></div>
+      </div>
+      <div class="preloader font-normal">
+          Loading...
+      </div>
+      <div class="swiper-container message_detail flex-normal">
+          <div class="swiper-wrapper">
+          </div>
+      </div>
+      <footer>
+          <form id="sendMessage" class="footer">
+              <div class="form-group">
+                <input type="text" class="user-input" id="message_input"/>
+                <input type="submit" class="send" value="发送">
+              </div>
+          </form>
+      </footer>
+    </div>
+    <!-- <div id="footer"></div> -->
+    <script src="/js/common.js"></script>
+    <script src="/js/message.js"></script>
+</body>
+</html>

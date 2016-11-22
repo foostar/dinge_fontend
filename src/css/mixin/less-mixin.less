@@ -1,0 +1,37 @@
+.flex-container-mixin(@box_start:start,@flex_start:flex-start){
+    display: -webkit-box; /* 老版本语法: Safari, iOS, Android browser, older WebKit browsers. */
+    display: -moz-box; /* 老版本语法: Firefox (buggy) */
+    display: -ms-flexbox; /* 混合版本语法: IE 10 */
+    display: -webkit-flex; /* 新版本语法: Chrome 21+ */
+    display: flex; /* 新版本语法: Opera 12.1, Firefox 22+ */
+    -webkit-box-direction: normal;
+    -webkit-box-orient: horizontal;
+    -moz-flex-direction: row;
+    -webkit-flex-direction: row;
+    flex-direction: row;
+    box-align: @box_start;
+    align-items: @flex_start;
+}
+.flex(@flex) {
+    -webkit-box-flex: @flex;
+    -moz-box-flex: @flex;
+    -o-box-flex: @flex;
+    box-flex: @flex;
+    -webkit-flex: @flex;
+    -moz-flex: @flex;
+    -ms-flex: @flex;
+    -o-flex: @flex;
+    flex: @flex;
+}
+.flex-column-mixin(){
+    -webkit-box-direction: normal;
+    -webkit-box-orient: vertical;
+    -moz-flex-direction: column;
+    -webkit-flex-direction: column;
+    flex-direction: column;
+}
+
+/*
+ *   @mixin 应用
+ */
+

@@ -1,0 +1,14 @@
+{
+    "status": 1,
+    "data": {
+            "_id": "577f5baed1e87df41602b045",
+            "createdAt": "2016-07-07T07:52:14.994Z",
+            "title": "哈哈哈哈",
+            "content": "你大爷的2",
+            "commentFrom": {
+                "_id": "577cc175ffd27d3c2f325c6f",
+                "nickname": "lovesong",
+                "avatar":"/images/carouse/head.png"
+            }
+        }
+}
