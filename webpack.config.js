@@ -50,6 +50,7 @@ module.exports = {
     },
     resolve: {
         alias: {
+            Zepto: srcDir + "/js/lib/zepto.js",
             Swiper: srcDir + "/js/lib/swiper.jquery.min.js",
             dingeTools: srcDir + "/js/core/dingeTools.js",
             API: srcDir + "/js/api/api.js"

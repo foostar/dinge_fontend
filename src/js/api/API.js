@@ -5,7 +5,7 @@
  *       #question   使用fetch  
  *   适应方式：  1.改写api方法  2.改写storage 
  */
-var $ = require("jQuery");
+var $ = require("Zepto");
 
 function API (opt) {
     this.env = opt.env;
@@ -21,95 +21,109 @@ API.prototype = {
      */
     api: function (opt, storage, controls) {
         var self = this;
-        return $.ajax({
-            url: opt.url || "",
-            data: opt.data || {},
-            method: opt.method || "GET",
-            datatype: "json",
-            beforeSend: function() {
-                self.requestNum++;
-                self.showLoading();
-            },
-            complete: function(data) {
-                if(data.responseJSON.status == 1) {
-                    var value;
-                    var local = JSON.parse(self.getStorage(storage));
-                    if(!controls) { 
-                        value = data.responseJSON.data;
-                        if(Object.prototype.toString.call(value) == "[object Object]") {
-                            value = JSON.stringify(Object.assign({}, value, { timeStamp: Date.now() }));
-                        } else {
-                            value = JSON.stringify(Object.assign({}, { 
-                                timeStamp: Date.now(),
-                                mes: value
-                            }));
-                        }
+        return new Promise((reslove, reject) => {
+            $.ajax({
+                url: opt.url || "",
+                data: opt.data || {},
+                method: opt.method || "GET",
+                datatype: "json",
+                beforeSend: function() {
+                    self.requestNum++;
+                    self.showLoading();
+                },
+                success: function (data) {
+                    reslove(data);
+                },
+                error: function(error) {
+                    reject(error);
+                },
+                complete: function(data) {
+                    let responseJSON;
+                    try {
+                        responseJSON = JSON.parse(data.response);
+                    } catch(e) {
+                        responseJSON = data.response;
                     }
-                    if(controls && controls.replace == true) {
-                        value = Object.assign({}, JSON.parse(self.getStorage(storage)), opt.data, {
-                            timeStamp: Date.now()
-                        });
-                        if (value.token) {
-                            delete value.token;
-                        }
-                        value = JSON.stringify(value);
-                    }
-                    if(controls && controls.push == true) {
-                        if(local.list.length == 10) {
-                            local.list.shift();
-                        }
-                        var templateMes = Object.assign({}, local.list[ 0 ]);
-                        if(!templateMes.from){
-                            templateMes = {
-                                from:{},
-                                to:{},
-                                content:"",
-                                createdAt:new Date(),
-                                updatedAt:new Date()
-                            };
-                        }
-                        templateMes.from._id = opt.data.token;
-                        var userinfo = JSON.parse(self.getStorage("userinfo"));
-                        local.list.forEach(function(v){
-                            if(v.from._id == opt.data.token) {
-                                v.from.avatar = userinfo.avatar;
+                    
+                    if(responseJSON.status == 1) {
+                        var value;
+                        var local = JSON.parse(self.getStorage(storage));
+                        if(!controls) { 
+                            value = responseJSON.data;
+                            if(Object.prototype.toString.call(value) == "[object Object]") {
+                                value = JSON.stringify(Object.assign({}, value, { timeStamp: Date.now() }));
                             } else {
-                                templateMes.to._id = v.from._id;
-                                templateMes.to.nickname = v.from.nickname;
-                                templateMes.to.avatar = v.from.avatar;
+                                value = JSON.stringify(Object.assign({}, { 
+                                    timeStamp: Date.now(),
+                                    mes: value
+                                }));
                             }
-                        });
-                        templateMes.content = opt.data.content;
-                        templateMes.createdAt = new Date();
-                        templateMes.updatedAt = new Date();
-                        local.list.push(templateMes);
-                        value = JSON.stringify(local);
-                    }
-                    if (controls && controls.delete) {
-                        if (opt.data.page == 1) {
-                            local.list = local.list.filter(function(v){
-                                return v[ controls.delete ] != opt.data.id;
+                        }
+                        if(controls && controls.replace == true) {
+                            value = Object.assign({}, JSON.parse(self.getStorage(storage)), opt.data, {
+                                timeStamp: Date.now()
                             });
-                            local.list.push(data.responseJSON.data);
-                            value = JSON.stringify(local);
-                        } else {
+                            if (value.token) {
+                                delete value.token;
+                            }
+                            value = JSON.stringify(value);
+                        }
+                        if(controls && controls.push == true) {
+                            if(local.list.length == 10) {
+                                local.list.shift();
+                            }
+                            var templateMes = Object.assign({}, local.list[ 0 ]);
+                            if(!templateMes.from){
+                                templateMes = {
+                                    from:{},
+                                    to:{},
+                                    content:"",
+                                    createdAt:new Date(),
+                                    updatedAt:new Date()
+                                };
+                            }
+                            templateMes.from._id = opt.data.token;
+                            var userinfo = JSON.parse(self.getStorage("userinfo"));
+                            local.list.forEach(function(v){
+                                if(v.from._id == opt.data.token) {
+                                    v.from.avatar = userinfo.avatar;
+                                } else {
+                                    templateMes.to._id = v.from._id;
+                                    templateMes.to.nickname = v.from.nickname;
+                                    templateMes.to.avatar = v.from.avatar;
+                                }
+                            });
+                            templateMes.content = opt.data.content;
+                            templateMes.createdAt = new Date();
+                            templateMes.updatedAt = new Date();
+                            local.list.push(templateMes);
                             value = JSON.stringify(local);
                         }
+                        if (controls && controls.delete) {
+                            if (opt.data.page == 1) {
+                                local.list = local.list.filter(function(v){
+                                    return v[ controls.delete ] != opt.data.id;
+                                });
+                                local.list.push(responseJSON.data);
+                                value = JSON.stringify(local);
+                            } else {
+                                value = JSON.stringify(local);
+                            }
+                        }
+                        self.setStorage(storage, value);
                     }
-                    self.setStorage(storage, value);
+                    self.requestNum--;
+                    if (self.requestNum == 0) {
+                        self.closeLoading();
+                    }
                 }
-                self.requestNum--;
-                if (self.requestNum == 0) {
-                    self.closeLoading();
-                }
-            }
+            });
         });
     },
     /*
      * 设置缓存
      */
     setStorage: function (key, value) {
-        console.log(key, value)
         if(!key || !value) throw new Error("缺少必要的参数");
         if(Object.prototype.toString.call(value) == "[object object]") {
             value = JSON.stringify(value);

@@ -60,7 +60,7 @@ $(function(){
             return dingeTools.comments({
                 page: this.page,
                 pageSize: this.pageSize
-            });
+            }, 0);
         },
         loadingComent(){
             return new Promise((resolve, reject) => {
