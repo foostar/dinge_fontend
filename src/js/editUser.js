@@ -3,6 +3,7 @@
  * @desc 编辑用户资料
  */
 const $ = require("Zepto");
+const dingeUI = require("dingeUi");
 const dingeTools = require("dingeTools");
 const Cookie = require("js-cookie");
 const { provsData, citysData, distsData } = require("./lib/cityData.js");
@@ -29,7 +30,7 @@ $(() => {
             this.uploadCarouse(); 
         },
         uploadCarouse(){
-            new dingeTools.LUploader(document.getElementById("carouse"), {
+            new dingeUI.LUploader(document.getElementById("carouse"), {
                 url: "/carouse/api/addCarouse",//post请求地址
                 multiple: false,//是否一次上传多个文件 默认false
                 maxsize: 102400,//忽略压缩操作的文件体积上限 默认100kb
@@ -39,8 +40,8 @@ $(() => {
             });
         },
         choiceSex(){
-            $(".edit_modal a").on("touchend", () => {
-                $(".edit_content_sex").html($(this).html());
+            $(".edit_modal a").on("touchend", (event) => {
+                $(".edit_content_sex").html($(event.target).html());
                 $(".edit_mask").addClass("edit_mask_out");
                 setTimeout(() => {
                     $(".edit_mask").removeClass("edit_mask_out edit_mask_in");
@@ -49,7 +50,7 @@ $(() => {
             });
         },
         alertSexChoice(){
-            this.ele.on("click",".edit_content_sex", () => {
+            this.ele.on("touchend",".edit_content_sex", () => {
                 $(".edit_mask").show();
                 setTimeout(() => {
                     $(".edit_mask").addClass("edit_mask_in");
@@ -57,7 +58,7 @@ $(() => {
             });
         },
         submitUserData(){
-            $(".goback").on("click", (event) => {
+            $(".goback").on("touchend", (event) => {
                 event.preventDefault();
                 if($("#sign").val().length > 30){
                     return alert("签名不能大于30个字符！");
@@ -115,7 +116,7 @@ $(() => {
                 $("#carouse").attr("data-user-id",Cookie.get("dinge"));
                 const sign = document.getElementById("sign");
                 // 创建日历插件
-                const calendar = new dingeTools.LCalendar();
+                const calendar = new dingeUI.LCalendar();
                 calendar.init({
                     "trigger": "#birthday", //标签id
                     "type": "date", //date 调出日期选择 datetime 调出日期时间选择 time 调出时间选择 ym 调出年月选择,
@@ -124,7 +125,7 @@ $(() => {
                 });
 
                 // 创建地区插件
-                const area1 = new dingeTools.LArea();
+                const area1 = new dingeUI.LArea();
                 area1.init({
                     "trigger": "#city", //触发选择控件的文本框，同时选择完毕后name属性输出到该位置
                     "valueTo": "#city_value", //选择完毕后id属性输出到该位置

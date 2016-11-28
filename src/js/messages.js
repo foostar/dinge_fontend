@@ -1,5 +1,2 @@
-var $ = window.jQuery;
-var dingeTools = window.dingeTools;
-$(function(){
-    dingeTools.init(); 
-});
+const dingeTools = require("dingeTools");
+dingeTools.init();

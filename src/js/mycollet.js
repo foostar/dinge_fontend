@@ -10,7 +10,7 @@ const Swiper = require("Swiper");
 (($) => {
     function MyCollet(opt){
         this.holdPosition = 0;
-        this.page = 0;
+        this.page = 1;
         this.mySwiper = "";
         this.ele = $("#"+opt.id);
         this.init();
@@ -25,9 +25,9 @@ const Swiper = require("Swiper");
             // 初试化touchmove，解决tap中 swipe不生效的问题
             dingeTools.initTouchMove();
             // 左滑出现删除按钮
-            dingeTools.showDelete(self.ele);
+            dingeTools.showDelete(this.ele);
             // 关闭删除按钮
-            dingeTools.cancelDelete(self.ele);
+            dingeTools.cancelDelete(this.ele);
             // 删除silder
             this.deleteSilder();
             // 向上返回
@@ -45,67 +45,56 @@ const Swiper = require("Swiper");
                     +"</div>";
         },
         deleteSilder(){
-            let { deleteAction, page, mySwiper, getTemplate } = this;
             // 删除slider
             this.ele.on("touchend",".del_info_btn", (event) => {
                 var userId = $(this).attr("data-id");
-                $(this).parent().parent().remove();
-                deleteAction({
+                $(event.target).parent().parent().remove();
+                this.deleteAction({
                     token:Cookie.get("dinge"),
-                    page:page,
+                    page:this.page,
                     userId:userId
                 })
-                .done((result) => {
+                .then((result) => {
                     if(result.status == 1 && result.data){
                         const item = result.data;
-                        const template = getTemplate(item);
-                        mySwiper.params.onlyExternal=true;
-                        mySwiper.appendSlide(template);
-                        mySwiper.params.onlyExternal=false;
+                        const template = this.getTemplate(item);
+                        this.mySwiper.params.onlyExternal=true;
+                        this.mySwiper.appendSlide(template);
+                        this.mySwiper.params.onlyExternal=false;
                         //Update active slide
-                        mySwiper.updateActiveSlide(0);
-                    }   
+                        this.mySwiper.updateActiveSlide(0);
+                    }
                 });
                 event.stopPropagation();
             });
         },
         deleteAction(data){
-            return $.ajax({
-                url:"../data/unfocus.json",
-                method:"GET",
-                data:data,
-                dataType:"json"
-            });
+            return dingeTools.uncollet(data);
         },
         render(){
             this.showList(); 
         },
         showList(){
             // 加载数据
-            this.loadColletList(this.page)
-            .done((result) => {
+            this.fetchData(this.page)
+            .then((result) => {
                 // 拼凑数据
                 this.makeData(result);
                 // 初始化swiper
                 this.initSwiper(result);
             });
         },
-        loadColletList(page){
-            return  $.ajax({
-                url:"../data/getMyCollet.json",
-                method:"GET",
-                data:{
-                    token:Cookie.get("dinge"),
-                    page:page
-                },
-                dataType:"json"
+        fetchData(page){
+            return dingeTools.getMyCollet({
+                token:Cookie.get("dinge"),
+                page:page
             });
         },
         makeData(result){
             const { getTemplate } = this;
             let html = "";
-            if(result.status == 1 &&  result.data.length>0) {
-                let data = result.data;
+            if(result.status == 1 &&  result.data.list.length>0) {
+                let data = result.data.list;
                 data.forEach((item) => {
                     html += "<div class='swiper-slide'>"+getTemplate(item)+"</div>";
                 });
@@ -113,10 +102,11 @@ const Swiper = require("Swiper");
             }
         },
         initSwiper(result){
-            let { mySwiper, holdPosition, page, loadColletList } = this;
-            if(result.status == 1 && page == 0){
+            let { holdPosition, page, fetchData } = this;
+            const self = this;
+            if(result.status == 1 && page == 1){
                 // 初始化swiper
-                mySwiper = new Swiper(".swiper-container",{
+                this.mySwiper = new Swiper(".swiper-container",{
                     slidesPerView:"auto",
                     mode:"vertical",
                     watchActiveIndex: true,
@@ -135,23 +125,23 @@ const Swiper = require("Swiper");
                             const containerHeight = self.mySwiper.height;
                             if(swiperHeight > containerHeight){
                                 var transition = "-"+(swiperHeight-containerHeight+100);
-                                mySwiper.setWrapperTranslate(0,transition,0);
+                                self.mySwiper.setWrapperTranslate(0,transition,0);
                             }
-                            mySwiper.params.onlyExternal=true;
+                            self.mySwiper.params.onlyExternal=true;
                             //Show loader
                             $(".preloader").addClass("visible_bottom");
                             //加载新的slide
-                            loadColletList(page)
-                            .done((result) => {
-                                if(result.status == 1 &&  result.data.length>0){
-                                    let data = result.data;
+                            fetchData(page)
+                            .then((result) => {
+                                if(result.status == 1 &&  result.data.list.length>0){
+                                    let data = result.data.list;
                                     data.forEach((item) => {
                                         const template = self.getTemplate(item);
                                         self.mySwiper.appendSlide(template);
                                     });
-                                    mySwiper.params.onlyExternal=false;
+                                    self.mySwiper.params.onlyExternal=false;
                                     //Update active slide
-                                    mySwiper.updateActiveSlide(0);
+                                    self.mySwiper.updateActiveSlide(0);
                                     //Hide loader
                                     $(".preloader").removeClass("visible_bottom");
                                     page++;

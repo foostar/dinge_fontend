@@ -4,6 +4,7 @@ const Cookie = require("js-cookie");
 
 $(() => {
     function Search(){ 
+        this.page = 1;
         this.init();
     }
     Search.prototype={
@@ -20,10 +21,7 @@ $(() => {
         render(){
             this.loadingImg();
             /*self.movieList()*/
-            this.movieList()
-            .then(() => {
-                $(".loading").hide();   
-            });
+            this.movieList();
         },
         loadingImg(){
             $(".loading").show();
@@ -31,27 +29,20 @@ $(() => {
         movieList(){
              //debugger
             //电影列表的接口
-            return new Promise((resolve) => {
-                $.ajax({
-                    url:"../data/showMovieList.json",
-                    method:"GET",
-                    data:{
-                        token:Cookie.get("dinge")
-                    },
-                    dataType:"json",
-                    success: (result) => {
-                        let html = "";
-                        if(result.status == 1 && result.data.length>0){ 
-                            let data = result.data;
-                            data.forEach((item) => {
-                               //console.log(item.images.medium);
-                                html += "<li><a href='moviedetails.html?id="+item._id+"'><img src="+item.images.large+" alt=''><span class='font-h'>"+item.title+"</span></a></li>";
-                            });
-                            $(html).appendTo($(".search_body"));
-                        }
-                        resolve();
-                    }
-                });
+            dingeTools.movie({
+                page:this.page
+            })
+            .then((result) => {
+                let html = "";
+                if(result.status == 1 && result.data.list.length>0){ 
+                    let data = result.data.list;
+                    data.forEach((item) => {
+                       //console.log(item.images.medium);
+                        html += "<li><a href='moviedetails.html?id="+item._id+"'><img src="+item.images.large+" alt=''><span class='font-h'>"+item.title+"</span></a></li>";
+                    });
+                    $(html).appendTo($(".search_body"));
+                    $(".loading").hide();
+                }
             });
         },
         changeHref(){

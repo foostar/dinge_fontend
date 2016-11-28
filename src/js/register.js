@@ -59,26 +59,16 @@ const Cookie = require("js-cookie");
             return this.submitRegister();
         },
         submitLogin(){
-            return $.ajax({
-                type:"get",
-                url:"../data/signin.json",
-                data:{
-                    account:$("#email").val(),
-                    password:$("#password").val()
-                },
-                datatype:"json"
+            return dingeTools.register({
+                account:$("#email").val(),
+                password:$("#password").val()
             });
         },
         submitRegister(){
-            return $.ajax({
-                type:"get",
-                url:"../data/signup.json",
-                data:{
-                    userName:$("#userName").val(),
-                    email   :$("#email").val(),
-                    password:$("#password").val()
-                },
-                datatype:"json"
+            return dingeTools.register({
+                userName:$("#userName").val(),
+                email   :$("#email").val(),
+                password:$("#password").val()
             });
         }
     };

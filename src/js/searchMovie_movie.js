@@ -1,19 +1,15 @@
 const $ = require("Zepto");
+const dingeTools = require("dingeTools");
 
 $(() => {
-    $.ajax({
-        url:"/data/movieFindOne.json",
-        method:"GET",
-        data:{
-            movieId:"12345"
-        },
-        dataType:"json"
+    dingeTools.search({
+        movieId:"12345"
     })
-    .done((res) => {
+    .then((res) => {
         //console.log(res);
         let html = "";
         if(res.status == 1){
-            let data = res.data;   
+            let data = res.data.list;   
             //console.log(data);         
             for(let i=0;i<data.length;i++){
                 let monent = data[ i ].releasetime;

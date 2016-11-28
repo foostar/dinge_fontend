@@ -6,7 +6,7 @@ const Swiper = require("Swiper");
 (($) => {
     function MyCollet(opt){
         this.holdPosition = 0;
-        this.page = 0;
+        this.page = 1;
         this.mySwiper = "";
         this.ele = $("#"+opt.id);
         this.init();
@@ -20,25 +20,11 @@ const Swiper = require("Swiper");
         bindEvent(){
             // 初试化touchmove，解决tap中 swipe不生效的问题
             dingeTools.initTouchMove();
-            // 左滑出现删除按钮
-            //dingeTools.showDelete(self.ele);
-            // 关闭删除按钮
-            //dingeTools.cancelDelete(self.ele);
-            // 删除silder
-            //self.deleteSilder();
             // 向上返回
             dingeTools.goBack();
             //self.goHref();
             this.moviedetailsTop(); //电影详情页上面部分
         },
-        /*goHref(){
-            $(".m_details_top").tap(function(){
-                window.location.href = "/views/moviedetails_top.html";
-            });
-            $(".m_detail_href").tap(function(){
-                window.location.href="/views/moviedetails_comment.html";
-            });
-        },*/
         getTemplate(item){
             //debugger
             return  "<a href='moviedetails_comment.html?id="+item._id+"'>"
@@ -57,44 +43,6 @@ const Swiper = require("Swiper");
                         +"</div>"
                     +"</a>";
         },
-        deleteSilder(){
-            let { deleteAction, page, mySwiper, getTemplate } = this;
-            // 删除slider
-            this.ele.on("touchend",".del_info_btn", (event) => {
-                const userId = $(this).attr("data-id");
-                $(this).parent().parent().remove();
-                deleteAction({
-                    token:Cookie.get("dinge"),
-                    page:page,
-                    userId:userId
-                })
-                .done((result) => {
-                    if(result.status == 1 && result.data){
-                        const item = result.data;
-                        const template = getTemplate(item);
-                        mySwiper.params.onlyExternal=true;
-                        mySwiper.appendSlide(template);
-                        mySwiper.params.onlyExternal=false;
-                        //Update active slide
-                        mySwiper.updateActiveSlide(0);
-                    }   
-                });
-                event.stopPropagation();
-            });
-        },
-        deleteAction(data){
-            return new Promise((reslove) => {
-                $.ajax({
-                    url:"../data/unfocus.json",
-                    method:"GET",
-                    data:data,
-                    dataType:"json",
-                    success:function(data){
-                        reslove(data);
-                    }
-                });
-            });
-        },
         render(){
             this.showList(); 
         },
@@ -109,53 +57,38 @@ const Swiper = require("Swiper");
         },
         loadColletList(page){
             const id=  dingeTools.getURLParam("id");
-            return new Promise((reslove) => {
-                $.ajax({
-                    url:"../data/commentsDetail.json",
-                    method:"GET",
-                    data:{
-                        token:Cookie.get("dinge"),
-                        page:page,
-                        id:id
-                    },
-                    dataType:"json",
-                    success:function(data){
-                        reslove(data);
-                    }
-                });
+            return dingeTools.commentByMovie({
+                token:Cookie.get("dinge"),
+                page:page,
+                id:id
             });
         },
         moviedetailsTop(){   //TODO 加载头部部分
             //debugger
             const id=  dingeTools.getURLParam("id");
-            return  $.ajax({
-                url:"../data/movieFindOne.json",
-                method:"GET",
-                data:{
-                    token:Cookie.get("dinge"),
-                    id:id
-                },
-                dataType:"json",
-                success: (result) => {
-                    //debugger
-                    let html = "";
-                    if(result.status == 1 && result.data.length>0){ 
-                        let data = result.data;
-                        data.forEach((item) => {
-                            html += "<a href='moviedetails_top.html?id="+item._id+"'>"
-                                        +"<div class='m_details_topimg'><img src="+item.images.large+" alt=''></div>"
-                                        +"<div class='m_d_top_position'>"
-                                            +"<div class='m_mask font-normal'><span class='font-title'>"+item.rating.average+"</span>评分</div>"
-                                            +"<p class='font-bold'>"
-                                                +"<span>"+item.title+"</span>"
-                                                +"<span>"+item.aka[ 0 ].name+"</span>"
-                                                +"<span>"+item.etitle+"</span>"
-                                            +"</p>"
-                                        +"</div>"
-                                    +"</a>";
-                        });
-                        $(html).appendTo($(".m_details_top"));
-                    }
+            dingeTools.movie({
+                token:Cookie.get("dinge"),
+                id:id
+            })
+            .then((result) => {
+                //debugger
+                let html = "";
+                if(result.status == 1 && result.data.list.length>0){ 
+                    let data = result.data.list;
+                    data.forEach((item) => {
+                        html += "<a href='moviedetails_top.html?id="+item._id+"'>"
+                                    +"<div class='m_details_topimg'><img src="+item.images.large+" alt=''></div>"
+                                    +"<div class='m_d_top_position'>"
+                                        +"<div class='m_mask font-normal'><span class='font-title'>"+item.rating.average+"</span>评分</div>"
+                                        +"<p class='font-bold'>"
+                                            +"<span>"+item.title+"</span>"
+                                            +"<span>"+item.aka[ 0 ].name+"</span>"
+                                            +"<span>"+item.etitle+"</span>"
+                                        +"</p>"
+                                    +"</div>"
+                                +"</a>";
+                    });
+                    $(html).appendTo($(".m_details_top"));
                 }
             });
         },
@@ -172,7 +105,7 @@ const Swiper = require("Swiper");
         },
         initSwiper(result){
             let { mySwiper, holdPosition, page, loadColletList, getTemplate } = this;
-            if(result.status == 1 && page == 0){
+            if(result.status == 1 && page == 1){
                 // 初始化swiper
                 mySwiper = new Swiper(".swiper-container",{
                     slidesPerView:"auto",

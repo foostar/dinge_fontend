@@ -6,7 +6,7 @@ const Swiper = require("Swiper");
 (($) => {
     function MessagesComment(opt){
         this.holdPosition = 0;
-        this.page = 0;
+        this.page = 1;
         this.mySwiper = "";
         this.ele = $("#"+opt.id);
         this.init();
@@ -54,12 +54,11 @@ const Swiper = require("Swiper");
         showList(){
             let { page } = this;
             // 加载数据
-            page++;
             this.loadMessageComment({
                 token: Cookie.get("dinge"),
                 page: page
             })
-            .then(function(result){
+            .then((result) => {
                 // 拼凑数据
                 this.makeData(result);
                 // 初始化swiper
@@ -108,7 +107,6 @@ const Swiper = require("Swiper");
                             //Show loader
                             $(".preloader").addClass("visible_bottom");
                             //加载新的slide
-                            page++;
                             loadMessageComment({
                                 token:Cookie.get("dinge"),
                                 page:page
@@ -126,11 +124,12 @@ const Swiper = require("Swiper");
                                     //Hide loader
                                     $(".preloader").removeClass("visible_bottom");
                                 }
+                                page++;
                             });
                         }
                     }
                 });
-                
+                page++;
             } 
         }
     };

@@ -25,19 +25,14 @@ $(() => {
         },
         movieModule(){
             //电影模块
-            $.ajax({
-                url:"/data/movieFindOne.json",
-                method:"GET",
-                data:{
-                    movieId:"12345"
-                },
-                dataType:"json"
+            dingeTools.search({
+                movieId:"12345"
             })
-            .done((res) => {
+            .then((res) => {
                 //console.log(res);
                 let html = "";
                 if(res.status == 1){
-                    let data = res.data;   
+                    let data = res.data.list;   
                     //console.log(data);         
                     for(let i=0;i<data.length;i++){
                         let monent = data[ i ].releasetime;
@@ -57,20 +52,15 @@ $(() => {
         },
         reviewModule(){
             //影评模块
-            $.ajax({
-                url:"/data/commentsDetail.json",
-                method:"GET",
-                data:{
-                    commentId:"577ce7c52fbb740830816fe1"
-                },
-                dataType:"json"
+            dingeTools.search({
+                commentId: "12345"
             })
-            .done((res) => {
+            .then((res) => {
                 //console.log(res.data.content);
                 //console.log(res.data);
                 let html = "";
                 if(res.status == 1){
-                    let data = res.data;   
+                    let data = res.data.list;   
                     //console.log(data);         
                     for(let i=0;i<data.length;i++){
                         html += "<div class='review_div'>"
@@ -84,20 +74,15 @@ $(() => {
             });
         },
         userModule(){
-            $.ajax({
-                url:"/data/commentsDetail.json",
-                method:"GET",
-                data:{
-                    commentId:"577ce7c52fbb740830816fe1"
-                },
-                dataType:"json"
+            dingeTools.search({
+                userId: "12345"
             })
-            .done((res) => {
+            .then((res) => {
                 //console.log(res.data.content);
                 //console.log(res.data);
                 let html = "";
                 if(res.status == 1){
-                    let data = res.data;   
+                    let data = res.data.list;   
                     //console.log(data[0].commentFrom);         
                     for(let i=0;i<data.length;i++){
                         html += "<ul class='movie_user'>"
