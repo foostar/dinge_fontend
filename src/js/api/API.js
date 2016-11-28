@@ -44,8 +44,15 @@ API.prototype = {
                     } catch(e) {
                         responseJSON = data.response;
                     }
-                    
-                    if(responseJSON.status == 1) {
+                    let unSaveKeys = [ "register", "login", "search" ];
+                    let toSave = true;
+                    unSaveKeys.forEach((v) => {
+                        if (v == storage) {
+                            toSave = false;
+                        }
+                    });
+                    if(responseJSON.status == 1 && toSave) {
+                        console.log("aaa");
                         var value;
                         var local = JSON.parse(self.getStorage(storage));
                         if(!controls) { 
@@ -100,6 +107,7 @@ API.prototype = {
                             value = JSON.stringify(local);
                         }
                         if (controls && controls.delete) {
+                            console.log("local", local)
                             if (opt.data.page == 1) {
                                 local.list = local.list.filter(function(v){
                                     return v[ controls.delete ] != opt.data.id;
@@ -108,6 +116,7 @@ API.prototype = {
                                 value = JSON.stringify(local);
                             } else {
                                 value = JSON.stringify(local);
+                                console.log("value", value);
                             }
                         }
                         self.setStorage(storage, value);
@@ -383,6 +392,150 @@ API.prototype = {
             url: self.env == "test" ? `${self.URL}/data/deleteMyConmment.json` : `${self.URL}/Api/message/delMyComments`,
             data: opt
         }, key, { delete: "_id" });
+    },
+    /*
+     * 我关注的人
+     */
+    myFocusList: function (opt) {
+        var self = this;
+        var key = "myFocus";
+        if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
+        if (!opt || !opt.token) throw new Error("token为必传的参数，或传入参数不合法");
+        return this.api({
+            url: self.env == "test" ? `${self.URL}/data/getUserFocuslist.json` : `${self.URL}/user/getUserFocuslist`,
+            data: opt
+        }, key);
+    },
+    /*
+     * 删除我的关注
+     */
+    delMyFocus: function (opt) {
+        var self = this;
+        var key = "myFocus";
+        if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
+        if (!opt || !opt.token) throw new Error("token为必传的参数，或传入参数不合法");
+        return this.api({
+            url: self.env == "test" ? `${self.URL}/data/deleteMyFocus.json` : `${self.URL}/user/delUserFocus`,
+            data: opt
+        }, key, { delete: "_id" });
+    },
+    /*
+     * 搜索电影
+     */
+    movie: function (opt) {
+        var self = this;
+        var key;
+        if (opt.id) {
+            key = opt.id + "moviedetail";
+        } else {
+            key = "movieList";
+        }
+        return this.api({
+            url: self.env == "test" ? `${self.URL}/data/movieFindOne.json` : `${self.URL}/movie/movie`,
+            data: opt
+        }, key);
+    },
+    /*
+     * 电影的评论
+     */
+    commentByMovie: function (opt) {
+        var self = this;
+        var key = opt.id+"commentByMovie";
+        if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
+        if (!opt || !opt.token) throw new Error("token为必传的参数，或传入参数不合法");
+        return this.api({
+            url: self.env == "test" ? `${self.URL}/data/commentsDetail.json` : `${self.URL}/comment/getComments`,
+            data: opt
+        }, key);
+    },
+    /*
+     * 我的收藏
+     */
+    getMyCollet: function (opt) {
+        var self = this;
+        var key = "mycollet";
+        if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
+        if (!opt || !opt.token) throw new Error("token为必传的参数，或传入参数不合法");
+        return this.api({
+            url: self.env == "test" ? `${self.URL}/data/getMyCollet.json` : `${self.URL}/comment/getMyCollet`,
+            data: opt
+        }, key);
+    },
+    /*
+     * 删除收藏
+     */
+    uncollet: function (opt) {
+        var self = this;
+        var key = "mycollet";
+        if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
+        if (!opt || !opt.token) throw new Error("token为必传的参数，或传入参数不合法");
+        return this.api({
+            url: self.env == "test" ? `${self.URL}/data/unCollet.json` : `${self.URL}/comment/unCollet`,
+            data: opt
+        }, key, { delete: "_id" });
+    },
+    /*
+     * 加关注
+     */
+    focus: function (opt) {
+        var self = this;
+        var key = "myFocus";
+        if (!opt || !opt.id) throw new Error("id为必传的参数，或传入参数不合法");
+        if (!opt || !opt.token) throw new Error("token为必传的参数，或传入参数不合法");
+        return this.api({
+            url: self.env == "test" ? `${self.URL}/data/focusUser.json` : `${self.URL}/user/FocusUser`,
+            data: opt
+        }, key, { push: true });
+    },
+    /*
+     * 注册
+     */
+    register: function (opt) {
+        var self = this;
+        var key = "register";
+        if (!opt || !opt.userName) throw new Error("userName为必传的参数，或传入参数不合法");
+        if (!opt || !opt.email) throw new Error("email为必传的参数，或传入参数不合法");
+        if (!opt || !opt.password) throw new Error("password为必传的参数，或传入参数不合法");
+        return this.api({
+            url: self.env == "test" ? `${self.URL}/data/signup.json` : `${self.URL}/user/signup`,
+            data: opt
+        }, key);
+    },
+    /*
+     * 登录
+     */
+    login: function (opt) {
+        var self = this;
+        var key = "login";
+        if (!opt || !opt.userName) throw new Error("userName为必传的参数，或传入参数不合法");
+        if (!opt || !opt.email) throw new Error("email为必传的参数，或传入参数不合法");
+        if (!opt || !opt.password) throw new Error("password为必传的参数，或传入参数不合法");
+        return this.api({
+            url: self.env == "test" ? `${self.URL}/data/signin.json` : `${self.URL}/user/signin`,
+            data: opt
+        }, key);
+    },
+    /*
+     * 搜索
+     */
+    search: function (opt) {
+        var self = this;
+        var key = "search";
+        let url = `${self.URL}/data/movieFindOne.json`;
+        if (this.env == "test") {
+            if (opt.commentId) {
+                url = `${self.URL}/data/commentsDetail.json`;
+            }
+            if (opt.userId) {
+                url = `${self.URL}/data/commentsDetail.json`;
+            }
+        } else {
+            url = `${self.URL}/movie/search`;
+        }
+        return this.api({
+            url: url,
+            data: opt
+        }, key);
     }
 
 };

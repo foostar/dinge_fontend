@@ -5,7 +5,7 @@ const Swiper = require("Swiper");
 
 $(() => {
     function MessagesFans(){
-        this.page = 0;
+        this.page = 1;
     }
     MessagesFans.prototype = {
         init(){

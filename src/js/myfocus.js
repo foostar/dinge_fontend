@@ -6,7 +6,7 @@ const Swiper = require("Swiper");
 (($) => {
     function MyFocus(opt){
         this.holdPosition = 0;
-        this.page = 0;
+        this.page = 1;
         this.mySwiper = "";
         this.ele = $("#"+opt.id);
         this.init();
@@ -24,7 +24,7 @@ const Swiper = require("Swiper");
             dingeTools.showDelete(this.ele);
             // 关闭删除按钮
             dingeTools.cancelDelete(this.ele);
-            // 删除silder
+            // 删除slider
             this.deleteSlider();
             // 向上返回
             dingeTools.goBack();
@@ -49,7 +49,7 @@ const Swiper = require("Swiper");
                         +"<div class='del_info_mask'></div>"
                     +"</div>";
         },
-        deleteSilder(){
+        deleteSlider(){
             // 删除slider
             this.ele.on("touchend",".del_info_btn", (event) => {
                 var userId = $(this).attr("data-id");
@@ -59,7 +59,7 @@ const Swiper = require("Swiper");
                     page:this.page,
                     userId:userId
                 })
-                .done((result) => {
+                .then((result) => {
                     if(result.status == 1 && result.data){
                         const item = result.data;
                         const template = this.getTemplate(item);
@@ -68,37 +68,27 @@ const Swiper = require("Swiper");
                         this.mySwiper.params.onlyExternal=false;
                         //Update active slide
                         this.mySwiper.updateActiveSlide(0);
-                    }   
+                    }
                 });
                 event.stopPropagation();
             });
         },
         deleteAction(data){
-            return $.ajax({
-                url:"../data/unfocus.json",
-                method:"GET",
-                data:data,
-                dataType:"json"
-            });
+            return dingeTools.delMyFocus(data);
         },
         render(){
             this.showList();
         },
-        loadFocusList(page){
-            return  $.ajax({
-                url:"../data/getUserFocuslist.json",
-                method:"GET",
-                data:{
-                    token:Cookie.get("dinge"),
-                    page:page
-                },
-                dataType:"json"
+        fetchData(page){
+            return  dingeTools.myFocusList({
+                token:Cookie.get("dinge"),
+                page:page
             });
         },
         showList(){
             // 加载数据
-            this.loadFocusList(this.page)
-            .then(function(result){
+            this.fetchData(this.page)
+            .then((result) => {
                 // 拼凑数据
                 this.makeData(result);
                 // 初始化swiper
@@ -108,8 +98,8 @@ const Swiper = require("Swiper");
         makeData(result){
             const { getTemplate } = this;
             let html = "";
-            if(result.status == 1 &&  result.data.length>0) {
-                let data = result.data;
+            if(result.status == 1 &&  result.data.list.length>0) {
+                let data = result.data.list;
                 data.forEach((item) => {
                     html += "<div class='swiper-slide'>"+getTemplate(item)+"</div>";
                 });
@@ -117,7 +107,7 @@ const Swiper = require("Swiper");
             }
         },
         initSwiper(result){
-            let { getTemplate, loadFocusList } = this;
+            let { getTemplate, fetchData } = this;
             var self = this;
             if (result.status != 1 || this.page != 1) return;
             // 初始化swiper
@@ -136,7 +126,6 @@ const Swiper = require("Swiper");
                 },
                 onTouchEnd(){
                     if (self.holdPosition < 100) return;
-                    self.page++; 
                     // 准备加载新的slider
                     const swiperHeight = $(".swiper-wrapper").height();
                     const containerHeight = self.mySwiper.height;
@@ -148,7 +137,7 @@ const Swiper = require("Swiper");
                     //Show loader
                     $(".preloader").addClass("visible_bottom");
                     // 加载新的slide
-                    loadFocusList(self.page)
+                    fetchData(self.page)
                     .then((result) => {
                         if(result.status == 1 && result.data.list.length>0){
                             var data = result.data.list;
@@ -166,6 +155,7 @@ const Swiper = require("Swiper");
                     });     
                 }
             });
+            this.page++;
         }
     };
     new MyFocus({id:"myfocus"});

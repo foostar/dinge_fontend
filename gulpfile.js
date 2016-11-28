@@ -107,7 +107,7 @@ gulp.task('clean', function (done) {
 });
 
 gulp.task('watch', function (done) {
-    gulp.watch('src/**/*', ['lessmin', 'build-js', 'fileinclude'])
+    gulp.watch('src/**/*', ['lessmin', 'build-js', 'fileinclude'/*, 'copy:data', 'copy:images'*/])
         .on('end', done);
 });
 

@@ -1,6 +1,7 @@
 {
     "status":1,
-    "data":[{
+    "data":{
+        "list":[{
         "_id":"575ce9607d5db6a81924e106",
         "title" : "蝙蝠侠大战超人", 
         "etitle" : "superman battle", 
@@ -39,6 +40,6 @@
             "average" : "7.9", 
             "star" : 80 
         }
-    }]
+    }]}
 }
 	

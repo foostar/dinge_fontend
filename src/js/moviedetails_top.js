@@ -16,18 +16,14 @@ $(() => {
         },
         loadData(){
             const id=  dingeTools.getURLParam("id");
-            $.ajax({
-                url:"../data/movieFindOne.json",
-                method:"GET",
-                data:{
-                    token:Cookie.get("dinge"),
-                    id:id
-                },
-                dataType:"json"
-            }).done((res) => {
+            dingeTools.movie({
+                token:Cookie.get("dinge"),
+                id:id
+            })
+            .then((res) => {
                 let html = "";
-                if(res.status == 1&& res.data.length>0){
-                    let data = res.data[ 0 ];
+                if(res.status == 1&& res.data.list.length>0){
+                    let data = res.data.list[ 0 ];
                     html += "<div class='m_details_top'>"
                                 +"<div class='m_details_topimg'><img src="+data.images.large+" alt=''></div>"
                                 +"<div class='m_d_top_position'>"

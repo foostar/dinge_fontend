@@ -1,6 +1,7 @@
 {
 	"status": 1,
-	"data": [
+	"data": { 
+        "list": [
 		{
             "_id":"afafdfsgs43423423",
 			"nickname": "缺缺",
@@ -62,5 +63,5 @@
             "avatar": "/images/carouse/head.png"
         }
         
-	]
+	]}
 }

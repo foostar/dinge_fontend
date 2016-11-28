@@ -1,20 +1,16 @@
 const $ = require("Zepto");
+const dingeTools = require("dingeTools");
 
 $(() => {
-    $.ajax({
-        url:"/data/commentsDetail.json",
-        method:"GET",
-        data:{
-            commentId:"577ce7c52fbb740830816fe1"
-        },
-        dataType:"json"
+    dingeTools.search({
+        userId: "12345"
     })
-    .done((res) => {
+    .then((res) => {
         //console.log(res.data.content);
         //console.log(res.data);
         let html = "";
         if(res.status == 1){
-            let data = res.data;   
+            let data = res.data.list;   
             //console.log(data[0].commentFrom);         
             for(let i=0;i<data.length;i++){
                 html += "<ul class='movie_user'>"

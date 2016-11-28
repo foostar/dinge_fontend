@@ -12,7 +12,7 @@ const Swiper = require("Swiper");
         this.ele = $("#"+opt.id);
         this.mySwiper = "";
         this.holdPosition = 0;
-        this.page = 0;
+        this.page = 1;
         this.init();
     }
     MyComment.prototype = {
@@ -55,7 +55,7 @@ const Swiper = require("Swiper");
                     page:this.page,
                     userId:userId
                 })
-                .done((result) => {
+                .then((result) => {
                     if(result.status == 1 && result.data){
                         const item = result.data;
                         const template = this.getTemplate(item);
@@ -76,9 +76,8 @@ const Swiper = require("Swiper");
             this.showList();
         },
         showList(){
-            this.page++; 
             // 加载数据
-            this.loadCommentList(this.page)
+            this.fetchData(this.page)
             .then((result) => {
                 // 拼凑数据
                 this.makeData(result);
@@ -86,7 +85,7 @@ const Swiper = require("Swiper");
                 this.initSwiper(result);
             });
         },
-        loadCommentList(page){
+        fetchData(page){
             return dingeTools.myConmments({
                 token:Cookie.get("dinge"),
                 page:page
@@ -104,7 +103,7 @@ const Swiper = require("Swiper");
             }
         },
         initSwiper(result){
-            let { getTemplate, loadCommentList } = this;
+            let { getTemplate, fetchData } = this;
             var self = this;
             if (result.status != 1 || this.page != 1) return;
             // 初始化swiper
@@ -123,7 +122,7 @@ const Swiper = require("Swiper");
                 },
                 onTouchEnd(){
                     if (self.holdPosition < 100) return;
-                    self.page++; 
+                    if ((self.page-1) * 20 > result.data.totalNum) return;
                     // 准备加载新的slider
                     const swiperHeight = $(".swiper-wrapper").height();
                     const containerHeight = self.mySwiper.height;
@@ -135,7 +134,7 @@ const Swiper = require("Swiper");
                     //Show loader
                     $(".preloader").addClass("visible_bottom");
                     // 加载新的slide
-                    loadCommentList(self.page)
+                    fetchData(self.page)
                     .then((result) => {
                         if(result.status == 1 && result.data.list.length>0){
                             var data = result.data.list;
@@ -152,7 +151,8 @@ const Swiper = require("Swiper");
                         }
                     });     
                 }
-            });   
+            }); 
+            this.page++;  
         }
     };
     new MyComment({id:"mycomment"});

@@ -1,6 +1,7 @@
 {
     "status": 1,
-    "data": [
+    "data": {
+        "list":[
         {
             "_id": "577f5baed1e87df41602b045",
             "createdAt": "2016-07-07T07:52:14.994Z",
@@ -34,5 +35,5 @@
                 "avatar":"/images/carouse/head.png"
             }
         }
-    ]
+    ]}
 }
