@@ -40,5 +40,3 @@ $(() => {
     const myfocus = new MyFocus({id:"myfocus"});
     myfocus.init();
 });
-    
-
