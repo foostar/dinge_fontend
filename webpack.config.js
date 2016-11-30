@@ -14,12 +14,10 @@ function getEntry() {
     var matchs = [], files = {};
     dirs.forEach(function (item) {
         matchs = item.match(/(.+)\.js$/);
-        console.log(matchs);
         if (matchs) {
             files[matchs[1]] = path.resolve(srcDir, 'js', item);
         }
     });
-    console.log(JSON.stringify(files));
     return files;
 }
 

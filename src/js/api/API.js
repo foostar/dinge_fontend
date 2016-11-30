@@ -52,7 +52,6 @@ API.prototype = {
                         }
                     });
                     if(responseJSON.status == 1 && toSave) {
-                        console.log("aaa");
                         var value;
                         var local = JSON.parse(self.getStorage(storage));
                         if(!controls) { 
@@ -107,7 +106,6 @@ API.prototype = {
                             value = JSON.stringify(local);
                         }
                         if (controls && controls.delete) {
-                            console.log("local", local)
                             if (opt.data.page == 1) {
                                 local.list = local.list.filter(function(v){
                                     return v[ controls.delete ] != opt.data.id;
@@ -116,7 +114,6 @@ API.prototype = {
                                 value = JSON.stringify(local);
                             } else {
                                 value = JSON.stringify(local);
-                                console.log("value", value);
                             }
                         }
                         self.setStorage(storage, value);
