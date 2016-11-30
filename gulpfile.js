@@ -42,6 +42,11 @@ gulp.task('copy:data', function (done) {
     gulp.src(['src/data/**']).pipe(gulp.dest('dist/data')).on('end', done);
 });
 
+//拷贝测试数据
+gulp.task('copy:font', function (done) {
+    gulp.src(['src/css/iconfont/**']).pipe(gulp.dest('dist/css')).on('end', done);
+});
+
 //压缩合并css, css中既有自己写的.less, 也有引入第三方库的.css
 gulp.task('lessmin', function (done) {
     gulp.src(['src/css/stylesheet.less'])
@@ -148,4 +153,4 @@ gulp.task("build-js", ['fileinclude'], function(callback) {
 gulp.task('default', ['copy:images', 'copy:data', 'lessmin', 'fileinclude', 'build-js', 'md5:css', "md5:js" ]);
 
 //开发
-gulp.task('dev', ['connect', 'copy:images', 'copy:data', 'lessmin', 'fileinclude', 'open', 'watch', 'build-js' ]);
+gulp.task('dev', ['connect', 'copy:images', 'copy:font', 'copy:data', 'lessmin', 'fileinclude', 'open', 'watch', 'build-js' ]);
