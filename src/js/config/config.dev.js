@@ -1,5 +1,5 @@
 module.exports = {
-    env: "pro",
-    url: "http://localhost:8686",
+    env: "test",
+    url: "http://localhost:3080",
     cacheTime: 0
 };
