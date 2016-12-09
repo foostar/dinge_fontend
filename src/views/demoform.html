@@ -70,6 +70,24 @@
           </div>
         </div>
         <div class="form-group">
+          <label for="acttime" class="col-sm-2 control-label">大海报：</label>
+          <div class="col-sm-10">
+            <input type="text" class="form-control" id="large" placeholder="大海报">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="acttime" class="col-sm-2 control-label">中海报：</label>
+          <div class="col-sm-10">
+            <input type="text" class="form-control" id="medium" placeholder="中海报">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="acttime" class="col-sm-2 control-label">小海报：</label>
+          <div class="col-sm-10">
+            <input type="text" class="form-control" id="small" placeholder="小海报">
+          </div>
+        </div>
+        <div class="form-group">
           <label for="acttime" class="col-sm-2 control-label">片长：</label>
           <div class="col-sm-10">
             <input type="text" class="form-control" id="acttime" placeholder="片长">
@@ -82,17 +100,81 @@
           </div>
         </div>
         <div class="form-group">
+          <label for="story" class="col-sm-2 control-label">预告片：</label>
+          <div class="col-sm-10">
+            <input type="text" class="form-control" id="videoUrl" placeholder="预告片">
+          </div>
+        </div>
+        <div class="form-group">
           <div class="col-sm-offset-2 col-sm-10">
-            <button type="submit" class="btn btn-primary">添加电影</button>
+            <button type="button" id="submit" class="btn btn-primary">添加电影</button>
           </div>
         </div>
       </form>
     </div>
     <script src="http://cdn.bootcss.com/jquery/1.12.0/jquery.min.js"></script>
     <script type="text/javascript">
-      $(function(){
+        var data = {};
+        $("#submit").click(function(){
+            console.log("json", data)
+            var directors = data.directors.map((item) => {
+              let ele = {}
+              ele.name = item.name
+              return ele
+            })
+            console.log(directors)
+            $.ajax({
+              type: "post",
+              url: "http://localhost:8686/Api/movie/addMovie",
+              data: {
+                title:data.title,
+                rating:{
+                  average:data.rating.average,
+                  star:data.rating.stars
+                },
+                directors:JSON.stringify(data.directors.map((item) => {
+                  let ele = {}
+                  ele.name = item.name
+                  return ele
+                })),
+                casts:JSON.stringify(data.casts.map((item) => {
+                  let ele = {}
+                  ele.name = item.name
+                  return ele
+                })),
+                country:JSON.stringify(data.countries.map((item) => {
+                  let ele = {}
+                  ele.name = item
+                  return ele
+                })),
+                genres:JSON.stringify(data.genres.map((item) => {
+                  let ele = {}
+                  ele.name = item
+                  return ele
+                })),
+                aka:JSON.stringify(data.aka.map((item) => {
+                  let ele = {}
+                  ele.name = item
+                  return ele
+                })),
+                language:JSON.stringify($("#language").val().split(",").map((item) => {
+                  let ele = {}
+                  ele.name = item
+                  return ele
+                })),
+                actime:$("#acttime").val(),
+                images:JSON.stringify(data.images),
+                subject:data.summary,
+                videoUrl:$("#videoUrl").val(),
+                releaseTime:data.year
+              },
+              dataType: "json",
+              success:function(json){
+                  
+              }
+            })
+        })
         $("#db_id").blur(function(){
-
           var id = $("#db_id").val()
           $.ajax({
               type: "get",
@@ -102,10 +184,9 @@
               crossDomain:true,
               jsonp: "callback",
               success:function(json){
-
+                  data = json
                   $("#movie-name").val(json.title)
                   $("#ranks").val(json.rating.average)
-                  console.log(json.directors)
                   $("#doctor").val(pathtoString(json.directors))
                   $("#actor").val(pathtoString(json.casts))
                   $("#story").val(json.summary)
@@ -113,10 +194,12 @@
                   $("#country").val(json.countries.join(","))
                   $("#type").val(json.genres.join(","))
                   $("#rename").val(json.aka.join(","))
+                  $("#large").val(json.images.large)
+                  $("#medium").val(json.images.medium)
+                  $("#small").val(json.images.small)
                   function pathtoString(obj){
                     var _arr=[]
                     for(var i in obj){
-                      console.log(obj[i],obj[i].name)
                       _arr.push(obj[i].name)
                     }
                     return _arr.join(",")
@@ -124,7 +207,7 @@
               }
           })
         })
-      })
+
       
     </script>
 </body>

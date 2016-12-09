@@ -1,3 +1,7 @@
+/**
+ * Created by xiusiteng on 2016-11-30.
+ * @desc 我的关注
+ */
 const $ = require("Zepto");
 const dingeTools = require("dingeTools");
 const Cookie = require("js-cookie");

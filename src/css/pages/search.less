@@ -1,7 +1,9 @@
 /*搜索框*/
-.search{width:6.4rem;height:0.88rem;padding-left:0.48rem;overflow:hidden;background-color:#55637c;position:fixed;top:0;left:0;z-index:9999;}
+.search{width:6.4rem;height:0.88rem;padding-left:0.48rem;overflow:hidden;background-color:#55637c;}
 .search li{height:0.88rem;line-height:0.88rem;float:left;}
-.search input{width:5.06rem;height:0.48rem;color:#fff;/* font-size:0.26rem; */border:0;background:#6b7d9c url(../../images/find_find.png) no-repeat;padding-left:0.36rem;background-size:0.5rem;background-position:4.5rem center;}
+.search form{position:relative;}
+.search form i {color:#fff;position: absolute;right:0.25rem}
+.search input{width:5.06rem;height:0.48rem;color:#fff;/* font-size:0.26rem; */border:0;background:#6b7d9c;padding-left:0.36rem;background-size:0.5rem;}
 :-moz-placeholder { /* Mozilla Firefox 4 to 18 */
     color:rgba(255,255,255,0.6);
 }
@@ -21,9 +23,12 @@ textarea::-webkit-input-placeholder {
 }
 .search_erweima img{height:0.52rem;margin:0.18rem 0 0 0.18rem;}
 /*搜索电影列表*/
-.search_body{width:6.4rem;background-color:#fff;padding:0.48rem 0.44rem;overflow:hidden;position:absolute;left:0;top:0.88rem;}
-.search_body li{float:left;width:2.61rem;/* height:476px; */}
-.search_body li img{width:2.61rem;height:3.73rem;}
-.search_body li:nth-of-type(odd){ margin-right:0.3rem;}/* 奇数行 */   
-.search_body li:nth-of-type(even){margin:0}/* 偶数行 */
-.search_body li span{/* font-size:0.28rem; */color:#393939;width:2.61rem;display:inline-block;text-align:center;padding:0.1rem 0;}
+#find .swiper-container {padding:.4rem 0 0;box-sizing:border-box;}
+#find .swiper-wrapper{overflow:hidden}
+.search_body{width:100%;background-color:#fff;overflow:hidden;}
+.search_body .swiper-wrapper{padding:0 .4rem;box-sizing:border-box;}
+.search_body .swiper-slide{float:left;width:2.61rem;/* height:476px; */}
+.search_body .swiper-slide img{width:2.61rem;height:3.73rem;}
+.search_body .swiper-slide:nth-of-type(odd){ margin-right:0.3rem;}/* 奇数行 */   
+.search_body .swiper-slide:nth-of-type(even){margin:0}/* 偶数行 */
+.search_body .swiper-slide span{/* font-size:0.28rem; */color:#393939;width:2.61rem;display:inline-block;text-align:center;padding:0.1rem 0;}

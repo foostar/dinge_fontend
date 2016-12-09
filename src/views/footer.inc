@@ -7,7 +7,7 @@
             </a>
         </li>
         <li class="flex-normal">
-            <a href="search.html" class="font-normal">
+            <a href="find.html" class="font-normal">
                 <div class="font-super iconfont icon-findH"></div>
                 发现
             </a>
