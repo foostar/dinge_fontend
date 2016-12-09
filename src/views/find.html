@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+	<meta charset="UTF-8">
+	<title>电影指南-发现</title>
+    <meta name="viewport" content="width=device-width,target-densitydpi=device-dpi,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+	<link type="text/css" href="/css/style.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container flex-container flex-column" id="find">
+	<ul class="search">
+		<li><form id="search" action="searchMovie.html" method="get"><input type="search" name="user_name" placeholder="寻找你的电影、影评和用户" id="sousuo" class="font-titles"></form></li>
+		<li class="search_erweima"><img src="../images/find_scan.png" alt=""></li>
+	</ul>
+	<div class="swiper-container flex-normal search_body">
+        <div class="swiper-wrapper clear">
+        </div>
+    </div>
+	<div id="footer">
+		@@include('footer.inc')
+	</div>
+</div>
+	<script src="/js/common.js"></script>
+	<script src="../js/find.js" type="text/javascript"></script>
+</body>
+</html>

@@ -1,4 +1,4 @@
- /* eslint-disable */
+  /* eslint-disable */
  /**
  * Created by xiusiteng on 2016-08-12.
  * @desc 公共工具函数
@@ -9,7 +9,9 @@ const Cookie = require("js-cookie");
 const config = require("../config/config");
 
 var Api = new API(config)
-Cookie.set("dinge","577cc175ffd27d3c2f325c6f")
+if (config.env == 'test') {
+    Cookie.set("dinge","577cc175ffd27d3c2f325c6f")
+}
 var DingeTools = {
     getURLParam:function (key){
         var  url=  window.location;
@@ -90,7 +92,7 @@ var DingeTools = {
         if(val.length < 1){
             return '账号不能为空！'
         }
-        if(val.length > 10){
+        if(val.length > 20){
             return '账号不能大于10个字符！'
         }
     },

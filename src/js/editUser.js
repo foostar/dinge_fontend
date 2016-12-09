@@ -6,6 +6,8 @@ const $ = require("Zepto");
 const dingeUI = require("dingeUi");
 const dingeTools = require("dingeTools");
 const Cookie = require("js-cookie");
+const config = require("./config/config");
+
 const { provsData, citysData, distsData } = require("./lib/cityData.js");
 
 $(() => { 
@@ -31,7 +33,7 @@ $(() => {
         },
         uploadCarouse(){
             new dingeUI.LUploader(document.getElementById("carouse"), {
-                url: "/carouse/api/addCarouse",//post请求地址
+                url: `${config.url}/carouse/api/addCarouse`,//post请求地址
                 multiple: false,//是否一次上传多个文件 默认false
                 maxsize: 102400,//忽略压缩操作的文件体积上限 默认100kb
                 accept: "image/*",//可上传的图片类型
@@ -70,8 +72,7 @@ $(() => {
                     sign: $("#sign").val(),
                     sex: $(".edit_content_sex").html(),
                     city: $("#city").val(),
-                    birthday: $("#birthday").val(),
-                    token: Cookie.get("dinge")
+                    birthday: $("#birthday").val()
                 };
                 // 修改数据
                 this.editUserInfo(data);
@@ -82,6 +83,11 @@ $(() => {
             .then((result) => {
                 if(result.status == 1){
                     window.history.back();
+                }
+            }, (err) => {
+                if(err.errcode && (err.errcode == 100401 || err.errcode == 100402)){
+                    Cookie.remove("dinge");
+                    window.location.href = "/views/login.html";
                 }
             });
         },
@@ -112,7 +118,9 @@ $(() => {
                 $(".word_count span").html(data.sign.length);
                 $(".edit_content_sex").html(data.sex);
                 $("#city").val(data.city);
-                $("#birthday").val(data.birthday);
+                let birthday = new Date(data.birthday);
+                birthday = birthday.getFullYear() + "-" + (birthday.getMonth() + 1) + "-" + birthday.getDate();
+                $("#birthday").val(birthday);
                 $("#carouse").attr("data-user-id",Cookie.get("dinge"));
                 const sign = document.getElementById("sign");
                 // 创建日历插件

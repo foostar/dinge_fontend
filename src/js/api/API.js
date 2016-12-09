@@ -6,6 +6,7 @@
  *   适应方式：  1.改写api方法  2.改写storage 
  */
 var $ = require("Zepto");
+var Cookie = require("js-cookie");
 
 function API (opt) {
     this.env = opt.env;
@@ -25,17 +26,29 @@ API.prototype = {
             $.ajax({
                 url: opt.url || "",
                 data: opt.data || {},
-                method: opt.method || "GET",
+                type: opt.method || "GET",
                 datatype: "json",
-                beforeSend: function() {
+                beforeSend: function(data) {
+                    if (opt.isAuth) {
+                        if(!Cookie.get("dinge")) {
+                            return reject({ errcode:100401, msg: "token为必传的参数，或token过期" });
+                        }
+                        data.setRequestHeader("authentication", Cookie.get("dinge"));
+                    }
                     self.requestNum++;
                     self.showLoading();
                 },
                 success: function (data) {
                     reslove(data);
                 },
-                error: function(error) {
-                    reject(error);
+                error: function(data) {
+                    let responseJSON;
+                    try {
+                        responseJSON = JSON.parse(data.response);
+                    } catch(e) {
+                        responseJSON = data.response;
+                    }
+                    reject(responseJSON);
                 },
                 complete: function(data) {
                     let responseJSON;
@@ -182,13 +195,13 @@ API.prototype = {
     userInfo: function (opt, cache) {
         var self = this;
         var key = "userinfo";
-        if (!opt || !opt.token) throw new Error("token为必传的参数，或传入参数不合法");
         if(this.isExpire(key, cache)) {
             return self.cacheData(key);
         }
         return this.api({
             url: self.env == "test" ? `${self.URL}/data/getUserInfo.json` : `${self.URL}/Api/user/getUserInfo`,
-            data: opt
+            data: opt,
+            isAuth: true
         }, key);
     },
     /*
@@ -201,7 +214,8 @@ API.prototype = {
         return this.api({
             url: self.env == "test" ? `${self.URL}/data/editUserInfo.json` : `${self.URL}/Api/user/editUserInfo`,
             method: self.env == "test" ? "GET" : "POST",
-            data: opt
+            data: opt,
+            isAuth:true
         }, key, {replace: true});
     },
     /*
@@ -399,7 +413,7 @@ API.prototype = {
         if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
         if (!opt || !opt.token) throw new Error("token为必传的参数，或传入参数不合法");
         return this.api({
-            url: self.env == "test" ? `${self.URL}/data/getUserFocuslist.json` : `${self.URL}/user/getUserFocuslist`,
+            url: self.env == "test" ? `${self.URL}/data/getUserFocuslist.json` : `${self.URL}/Api/user/getUserFocuslist`,
             data: opt
         }, key);
     },
@@ -412,7 +426,7 @@ API.prototype = {
         if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
         if (!opt || !opt.token) throw new Error("token为必传的参数，或传入参数不合法");
         return this.api({
-            url: self.env == "test" ? `${self.URL}/data/deleteMyFocus.json` : `${self.URL}/user/delUserFocus`,
+            url: self.env == "test" ? `${self.URL}/data/deleteMyFocus.json` : `${self.URL}/Api/user/delUserFocus`,
             data: opt
         }, key, { delete: "_id" });
     },
@@ -428,7 +442,7 @@ API.prototype = {
             key = "movieList";
         }
         return this.api({
-            url: self.env == "test" ? `${self.URL}/data/movieFindOne.json` : `${self.URL}/movie/movie`,
+            url: self.env == "test" ? `${self.URL}/data/movieFindOne.json` : `${self.URL}/Api/movie/showMovieList`,
             data: opt
         }, key);
     },
@@ -441,7 +455,7 @@ API.prototype = {
         if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
         if (!opt || !opt.token) throw new Error("token为必传的参数，或传入参数不合法");
         return this.api({
-            url: self.env == "test" ? `${self.URL}/data/commentsDetail.json` : `${self.URL}/comment/getComments`,
+            url: self.env == "test" ? `${self.URL}/data/commentsDetail.json` : `${self.URL}/Api/comment/getComments`,
             data: opt
         }, key);
     },
@@ -454,7 +468,7 @@ API.prototype = {
         if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
         if (!opt || !opt.token) throw new Error("token为必传的参数，或传入参数不合法");
         return this.api({
-            url: self.env == "test" ? `${self.URL}/data/getMyCollet.json` : `${self.URL}/comment/getMyCollet`,
+            url: self.env == "test" ? `${self.URL}/data/getMyCollet.json` : `${self.URL}/Api/comment/getMyCollet`,
             data: opt
         }, key);
     },
@@ -467,7 +481,7 @@ API.prototype = {
         if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
         if (!opt || !opt.token) throw new Error("token为必传的参数，或传入参数不合法");
         return this.api({
-            url: self.env == "test" ? `${self.URL}/data/unCollet.json` : `${self.URL}/comment/unCollet`,
+            url: self.env == "test" ? `${self.URL}/data/unCollet.json` : `${self.URL}/Api/comment/unCollet`,
             data: opt
         }, key, { delete: "_id" });
     },
@@ -480,7 +494,7 @@ API.prototype = {
         if (!opt || !opt.id) throw new Error("id为必传的参数，或传入参数不合法");
         if (!opt || !opt.token) throw new Error("token为必传的参数，或传入参数不合法");
         return this.api({
-            url: self.env == "test" ? `${self.URL}/data/focusUser.json` : `${self.URL}/user/FocusUser`,
+            url: self.env == "test" ? `${self.URL}/data/focusUser.json` : `${self.URL}/Api/user/FocusUser`,
             data: opt
         }, key, { push: true });
     },
@@ -490,11 +504,12 @@ API.prototype = {
     register: function (opt) {
         var self = this;
         var key = "register";
-        if (!opt || !opt.userName) throw new Error("userName为必传的参数，或传入参数不合法");
+        if (!opt || !opt.username) throw new Error("userName为必传的参数，或传入参数不合法");
         if (!opt || !opt.email) throw new Error("email为必传的参数，或传入参数不合法");
         if (!opt || !opt.password) throw new Error("password为必传的参数，或传入参数不合法");
         return this.api({
-            url: self.env == "test" ? `${self.URL}/data/signup.json` : `${self.URL}/user/signup`,
+            url: self.env == "test" ? `${self.URL}/data/signup.json` : `${self.URL}/Api/user/signup`,
+            method:self.env == "test" ? "get" : "post",
             data: opt
         }, key);
     },
@@ -504,11 +519,11 @@ API.prototype = {
     login: function (opt) {
         var self = this;
         var key = "login";
-        if (!opt || !opt.userName) throw new Error("userName为必传的参数，或传入参数不合法");
         if (!opt || !opt.email) throw new Error("email为必传的参数，或传入参数不合法");
         if (!opt || !opt.password) throw new Error("password为必传的参数，或传入参数不合法");
         return this.api({
-            url: self.env == "test" ? `${self.URL}/data/signin.json` : `${self.URL}/user/signin`,
+            url: self.env == "test" ? `${self.URL}/data/signin.json` : `${self.URL}/Api/user/signin`,
+            method:self.env == "test" ? "get" : "post",
             data: opt
         }, key);
     },
@@ -527,7 +542,7 @@ API.prototype = {
                 url = `${self.URL}/data/commentsDetail.json`;
             }
         } else {
-            url = `${self.URL}/movie/search`;
+            url = `${self.URL}/Api/common/search`;
         }
         return this.api({
             url: url,

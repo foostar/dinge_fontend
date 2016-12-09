@@ -9,43 +9,57 @@ $(() => {
         this.init();
     }
     SearchMovie.prototype ={
+        actice:"movie",
         init(){
             dingeTools.init();
             this.render();
             this.bindEvent();
         },
         render(){
-            this.movieModule();
-            this.reviewModule();
-            this.userModule(); 
+            $(".search_mov").val(decodeURIComponent(dingeTools.getURLParam("movie")));
+            this.renderModule();
+        },
+        renderModule() {
+            if (this.actice == "movie") {
+                this.movieModule();
+            } else if(this.actice == "comment") {
+                this.reviewModule();
+            } else {
+                this.userModule(); 
+            }
+        },
+        search(){
+            $(".search i").click(() => {
+                $("form").submit();
+            });
+            $("form").submit((event) => {
+                event.preventDefault();
+                this.renderModule();
+            });
         },
         bindEvent(){
+            this.search();
             this.cancel();
             this.tab();
         },
         movieModule(){
             //电影模块
             dingeTools.search({
-                movieId:"12345"
+                movieName:$(".search_mov").val()
             })
             .then((res) => {
-                //console.log(res);
                 let html = "";
                 if(res.status == 1){
+                    $("#searchMovie_movie").html("");
                     let data = res.data.list;   
-                    //console.log(data);         
-                    for(let i=0;i<data.length;i++){
-                        let monent = data[ i ].releasetime;
-                        let monsubstr=monent.substr(0, 10);    
-                        html += "<ul>"
-                                    +"<li class='search_tag1img'><img src="+data[ i ].images.large+" alt=''></li>"
-                                    +"<li class='search_tag1txt'>"
-                                        +"<div class='tag1_title font-title'>"+data[ i ].title+"</div>"
-                                        +"<div class='tag1_midtxt'><span class='font-normal'>"+monsubstr+"</span><em class='font-normal'>"+data[ i ].directors[ i ].name+"</em></div>"
-                                        +"<div class='tag1_bnttxt font-normal'><span class='font-title'>"+data[ i ].rating.average+"</span>评分</div>"
-                                    +"</li>"
-                                +"</ul>";
-                    }
+                    data.forEach((v) => {
+                        let monent = v.releaseTime.substr(0, 10);
+                        let directors = "";
+                        v.directors.forEach((d) => {
+                            directors += `<em class='font-normal'>${d.name}</em>`;
+                        });
+                        html += `<ul><li class='search_tag1img'><img src=${v.images.large} alt=''></li><li class='search_tag1txt'><div class='tag1_title font-title'>${v.title}</div><div class='tag1_midtxt'><span class='font-normal'>${monent}</span>${directors}</div><div class='tag1_bnttxt font-normal'><span class='font-title'>${parseInt(v.rating.average).toFixed(1)}</span>评分</div></li></ul>"`;
+                    });
                     $(html).appendTo($("#searchMovie_movie"));
                 }
             });
@@ -56,8 +70,7 @@ $(() => {
                 commentId: "12345"
             })
             .then((res) => {
-                //console.log(res.data.content);
-                //console.log(res.data);
+                $("#searchMovie_movie").html("");
                 let html = "";
                 if(res.status == 1){
                     let data = res.data.list;   
@@ -78,12 +91,10 @@ $(() => {
                 userId: "12345"
             })
             .then((res) => {
-                //console.log(res.data.content);
-                //console.log(res.data);
+                $("#searchMovie_movie").html("");
                 let html = "";
                 if(res.status == 1){
-                    let data = res.data.list;   
-                    //console.log(data[0].commentFrom);         
+                    let data = res.data.list;           
                     for(let i=0;i<data.length;i++){
                         html += "<ul class='movie_user'>"
                                     +"<li class='user_img'><a href='javascript:;'><img src="+data[ i ].commentFrom.avatar+" alt=''></a></li>"
@@ -96,15 +107,15 @@ $(() => {
         },
         tab(){
             //选项卡点击事件
-            $("#tag li").click(() => {
-                $("#tag li").eq($(this).index()).addClass("current").siblings().removeClass("current");
-                $(".tagClass").hide().eq($(this).index()).show();
+            $("#tag li").click((event) => {
+                $("#tag li").eq($(event.target).index()).addClass("current").siblings().removeClass("current");
+                $(".tagClass").hide().eq($(event.target).index()).show();
             });
         },
         cancel(){
             //点击取消触发事件
             $("#search_cancel").click(() => {
-                window.location.href="search.html";
+                window.location.href="find.html";
             });
         }
     };
