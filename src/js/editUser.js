@@ -80,6 +80,10 @@ $(() => {
             if(result.status == 1){
                 window.history.back();
             }
+        }, err => {
+            if(err.errcode == 100401 || err.errcode == 100402) {
+                window.location.href = "/views/login.html";
+            }
         });
     };
     EditUser.prototype.render = function(){
