@@ -11,7 +11,7 @@ dingeUi.LArea = (function() {
         this.value = [0, 0, 0];
     }
     MobileArea.prototype = {
-        init: function(params) {
+        init(params) {
             this.params = params;
             this.trigger = document.querySelector(params.trigger);
             if(params.valueTo){
