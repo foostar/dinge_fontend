@@ -9,20 +9,20 @@ $(() => {
         this.init();
     }
     SearchMovie.prototype ={
-        actice:"movie",
+        active:"movie",
         init(){
             dingeTools.init();
             this.render();
             this.bindEvent();
         },
         render(){
-            $(".search_mov").val(decodeURIComponent(dingeTools.getURLParam("movie")));
+            $(".search_mov").val(decodeURIComponent(dingeTools.getURLParam("name")));
             this.renderModule();
         },
         renderModule() {
-            if (this.actice == "movie") {
+            if (this.active == "movie") {
                 this.movieModule();
-            } else if(this.actice == "comment") {
+            } else if(this.active == "comment") {
                 this.reviewModule();
             } else {
                 this.userModule(); 
@@ -34,13 +34,32 @@ $(() => {
             });
             $("form").submit((event) => {
                 event.preventDefault();
-                this.renderModule();
+                this.formatSearch()
+                .then(() => {
+                    this.renderModule();
+                }, err => {
+                    console.log(err);
+                });
             });
         },
         bindEvent(){
             this.search();
             this.cancel();
             this.tab();
+        },
+        formatSearch() {
+            return new Promise((reslove, reject) => {
+                if (!$(".search_mov").val()) {
+                    return reject({ msg: "搜索项不能为空！" });
+                }
+                if ($(".search_mov").val().length > 10) {
+                    return reject({ msg: "搜索项过长！" });
+                }
+                if ($(".search_mov").val().match(/\<script\>/g)) {
+                    return reject({ msg: "搜索不合法！" });
+                }
+                reslove();
+            });
         },
         movieModule(){
             //电影模块
@@ -67,7 +86,7 @@ $(() => {
         reviewModule(){
             //影评模块
             dingeTools.search({
-                commentId: "12345"
+                commentTitle:$(".search_mov").val()
             })
             .then((res) => {
                 $("#searchMovie_movie").html("");
@@ -88,7 +107,7 @@ $(() => {
         },
         userModule(){
             dingeTools.search({
-                userId: "12345"
+                userName:$(".search_mov").val()
             })
             .then((res) => {
                 $("#searchMovie_movie").html("");
@@ -96,9 +115,9 @@ $(() => {
                 if(res.status == 1){
                     let data = res.data.list;           
                     for(let i=0;i<data.length;i++){
-                        html += "<ul class='movie_user'>"
-                                    +"<li class='user_img'><a href='javascript:;'><img src="+data[ i ].commentFrom.avatar+" alt=''></a></li>"
-                                    +"<li class='user_txt'>"+data[ i ].commentFrom.nickname+"</li>"        
+                        html += "<ul class='movie_user' data-id="+data[ i ]._id+">"
+                                    +"<li class='user_img'><a href='javascript:;'><img src="+data[ i ].avatar+" alt=''></a></li>"
+                                    +"<li class='user_txt font-h'>"+data[ i ].nickname+"</li>"        
                                 +"</ul>";
                     }
                     $(html).appendTo($("#searchMovie_user"));
@@ -110,6 +129,22 @@ $(() => {
             $("#tag li").click((event) => {
                 $("#tag li").eq($(event.target).index()).addClass("current").siblings().removeClass("current");
                 $(".tagClass").hide().eq($(event.target).index()).show();
+                switch($(event.target).index()) {
+                    case 0:
+                        this.active = "movie";
+                        break;
+                    case 1:
+                        this.active = "comment";
+                        break;
+                    default:
+                        this.active = "user";
+                }
+                this.formatSearch()
+                .then(() => {
+                    this.reviewModule();
+                }, err => {
+                    console.log(err);
+                });
             });
         },
         cancel(){

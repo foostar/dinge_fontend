@@ -418,19 +418,6 @@ API.prototype = {
         }, key);
     },
     /*
-     * 删除我的关注
-     */
-    delMyFocus: function (opt) {
-        var self = this;
-        var key = "myFocus";
-        if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
-        if (!opt || !opt.token) throw new Error("token为必传的参数，或传入参数不合法");
-        return this.api({
-            url: self.env == "test" ? `${self.URL}/data/deleteMyFocus.json` : `${self.URL}/Api/user/delUserFocus`,
-            data: opt
-        }, key, { delete: "_id" });
-    },
-    /*
      * 搜索电影
      */
     movie: function (opt) {
@@ -475,15 +462,20 @@ API.prototype = {
     /*
      * 删除收藏
      */
-    uncollet: function (opt) {
+    collet: function (opt) {
         var self = this;
         var key = "mycollet";
-        if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
-        if (!opt || !opt.token) throw new Error("token为必传的参数，或传入参数不合法");
+        if (!opt || !opt.commentId) throw new Error("id为必传的参数，或传入参数不合法");
+        opt = Object.assign({
+            type: "collet",
+            isList: false,
+            page: 1
+        }, opt);
         return this.api({
-            url: self.env == "test" ? `${self.URL}/data/unCollet.json` : `${self.URL}/Api/comment/unCollet`,
+            url: self.env == "test" ? `${self.URL}/data/unCollet.json` : `${self.URL}/Api/comment/collet`,
+            type: self.env == "test" ? "GET" : "POST",
             data: opt
-        }, key, { delete: "_id" });
+        }, key, opt.type == "collet" ? { push: true } : { delete: "_id" });
     },
     /*
      * 加关注
@@ -491,12 +483,17 @@ API.prototype = {
     focus: function (opt) {
         var self = this;
         var key = "myFocus";
-        if (!opt || !opt.id) throw new Error("id为必传的参数，或传入参数不合法");
-        if (!opt || !opt.token) throw new Error("token为必传的参数，或传入参数不合法");
+        if (!opt || !opt.userId) throw new Error("id为必传的参数，或传入参数不合法");
+        opt = Object.assign({
+            type: "focus",
+            isList: false,
+            page: 1
+        }, opt);
         return this.api({
             url: self.env == "test" ? `${self.URL}/data/focusUser.json` : `${self.URL}/Api/user/FocusUser`,
+            type: self.env == "test" ? "GET" : "POST",
             data: opt
-        }, key, { push: true });
+        }, key, opt.type == "focus" ? { push: true } : { delete: "_id" });
     },
     /*
      * 注册
@@ -535,10 +532,10 @@ API.prototype = {
         var key = "search";
         let url = `${self.URL}/data/movieFindOne.json`;
         if (this.env == "test") {
-            if (opt.commentId) {
+            if (opt.commentTitle) {
                 url = `${self.URL}/data/commentsDetail.json`;
             }
-            if (opt.userId) {
+            if (opt.userName) {
                 url = `${self.URL}/data/commentsDetail.json`;
             }
         } else {
