@@ -30,11 +30,8 @@ $(() => {
     };
     Find.prototype.bindEvent = function () {
         //点击搜索跳转搜索Ajax.load
-        $("#search").submit((event) => {
-            event.preventDefault();
-            if(!$("#sousuo").val()) return false;
-            if(/\<\>/g.test($("#sousuo").val())) return false;
-            window.location.href = `searchMovie.html?movie=${$("#sousuo").val()}`;
+        $("#search").on("touchend", function() {
+            window.location.href = `searchMovie.html?name=${encodeURIComponent($(".search_item").eq(0).find("span").html())}`;
         });
     };
     const search = new Find({
