@@ -57,13 +57,16 @@ API.prototype = {
                     } catch(e) {
                         responseJSON = data.response;
                     }
-                    let unSaveKeys = [ "register", "login", "search" ];
+                    let unSaveKeys = [ "register", "login", "search", "star" ];
                     let toSave = true;
                     unSaveKeys.forEach((v) => {
                         if (v == storage) {
                             toSave = false;
                         }
                     });
+                    if (!storage) {
+                        toSave = false;
+                    }
                     if(responseJSON.status == 1 && toSave) {
                         var value;
                         var local = JSON.parse(self.getStorage(storage));
@@ -440,7 +443,6 @@ API.prototype = {
         var self = this;
         var key = opt.id+"commentByMovie";
         if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
-        if (!opt || !opt.token) throw new Error("token为必传的参数，或传入参数不合法");
         return this.api({
             url: self.env == "test" ? `${self.URL}/data/commentsDetail.json` : `${self.URL}/Api/comment/getComments`,
             data: opt
@@ -460,7 +462,7 @@ API.prototype = {
         }, key);
     },
     /*
-     * 删除收藏
+     * 收藏
      */
     collet: function (opt) {
         var self = this;
@@ -545,7 +547,59 @@ API.prototype = {
             url: url,
             data: opt
         }, key);
+    },
+    /*
+     * 评论详情
+     */
+    commentsDetail: function (opt) {
+        var self = this;
+        var key = `${opt.commentId}commentsDetail`;
+        if (!opt || !opt.commentId) throw new Error("commentId为必传的参数，或传入参数不合法");
+        return this.api({
+            url: self.env == "test" ? `${self.URL}/data/commentsDetail.json` : `${self.URL}/Api/comment/commentsDetail`,
+            data: opt
+        }, key);
+    },
+    /*
+     * 点赞
+     */
+    star: function (opt) {
+        var self = this;
+        if (!opt || !opt.commentId) throw new Error("commentId为必传的参数，或传入参数不合法");
+        return this.api({
+            url: self.env == "test" ? `${self.URL}/data/unCollet.json` : `${self.URL}/Api/comment/addLike`,
+            data: opt
+        });
+    },
+    /*
+     * 评论电影
+     */
+    comment: function (opt) {
+        var self = this;
+        if (!opt || !opt.title) throw new Error("title为必传的参数，或传入参数不合法");
+        if (!opt || !opt.content) throw new Error("content为必传的参数，或传入参数不合法");
+        if (!opt || !opt.movie) throw new Error("movie为必传的参数，或传入参数不合法");
+        if (!opt || !opt.rank) throw new Error("rank为必传的参数，或传入参数不合法");
+        return this.api({
+            url: self.env == "test" ? `${self.URL}/data/unCollet.json` : `${self.URL}/Api/comment/commentMovie`,
+            data: opt
+        });
+    },
+    /*
+     * 回复评论
+     */
+    reply: function (opt) {
+        var self = this;
+        if (!opt || !opt.commentTo) throw new Error("commentTo为必传的参数，或传入参数不合法");
+        if (!opt || !opt.commentFrom) throw new Error("commentFrom为必传的参数，或传入参数不合法");
+        if (!opt || !opt.commentId) throw new Error("commentId为必传的参数，或传入参数不合法");
+        if (!opt || !opt.content) throw new Error("content为必传的参数，或传入参数不合法");
+        return this.api({
+            url: self.env == "test" ? `${self.URL}/data/unCollet.json` : `${self.URL}/Api/comment/addComments`,
+            data: opt
+        });
     }
+
 
 };
 module.exports = API;
