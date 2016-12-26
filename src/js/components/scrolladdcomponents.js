@@ -12,8 +12,7 @@ Scrolladdcomponents.prototype.bindEvent = function(){
     this.scrollDir({
         up : (x) => {
             if(x <= 0){
-                console.log("in");
-                this.nextPage();
+                this.getTemplate();
             }
         }
     });
@@ -24,7 +23,7 @@ Scrolladdcomponents.prototype.scrollDir = function({
 } = {}){
     let scrollT = this.ele.scrollTop();
     this.ele.scroll(function(){
-        console.log($(this).scrollTop(), ($(document).height()-$("#footer").height()+1), $(this).get(0).scrollHeight);
+        //console.log($(this).scrollTop(), ($(document).height()-$("#footer").height()+1), $(this).get(0).scrollHeight);
         if(scrollT < $(this).scrollTop()){
             up($(this).get(0).scrollHeight - ($(this).get(0).clientHeight + $(this).scrollTop()));
         }else{
