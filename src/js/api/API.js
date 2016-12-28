@@ -8,7 +8,7 @@
 var $ = require("Zepto");
 var Cookie = require("js-cookie");
 
-function API (opt) {
+function Api (opt) {
     this.env = opt.env;
     this.URL = opt.url;
     this.requestNum = 0;
@@ -16,7 +16,8 @@ function API (opt) {
     this.showLoading =  opt.showLoading || function(){};
     this.closeLoading = opt.closeLoading || function(){};
 }
-API.prototype = {
+Api.prototype = {
+    constructor: Api,
     /*
      * 请求函数
      */
@@ -57,13 +58,7 @@ API.prototype = {
                     } catch(e) {
                         responseJSON = data.response;
                     }
-                    let unSaveKeys = [ "register", "login", "search", "star" ];
                     let toSave = true;
-                    unSaveKeys.forEach((v) => {
-                        if (v == storage) {
-                            toSave = false;
-                        }
-                    });
                     if (!storage) {
                         toSave = false;
                     }
@@ -89,37 +84,6 @@ API.prototype = {
                                 delete value.token;
                             }
                             value = JSON.stringify(value);
-                        }
-                        if(controls && controls.push == true) {
-                            if(local.list.length == 10) {
-                                local.list.shift();
-                            }
-                            var templateMes = Object.assign({}, local.list[ 0 ]);
-                            if(!templateMes.from){
-                                templateMes = {
-                                    from:{},
-                                    to:{},
-                                    content:"",
-                                    createdAt:new Date(),
-                                    updatedAt:new Date()
-                                };
-                            }
-                            templateMes.from._id = opt.data.token;
-                            var userinfo = JSON.parse(self.getStorage("userinfo"));
-                            local.list.forEach(function(v){
-                                if(v.from._id == opt.data.token) {
-                                    v.from.avatar = userinfo.avatar;
-                                } else {
-                                    templateMes.to._id = v.from._id;
-                                    templateMes.to.nickname = v.from.nickname;
-                                    templateMes.to.avatar = v.from.avatar;
-                                }
-                            });
-                            templateMes.content = opt.data.content;
-                            templateMes.createdAt = new Date();
-                            templateMes.updatedAt = new Date();
-                            local.list.push(templateMes);
-                            value = JSON.stringify(local);
                         }
                         if (controls && controls.delete) {
                             if (opt.data.page == 1) {
@@ -172,7 +136,11 @@ API.prototype = {
     isExpire: function (key, cache) {
         var self = this;
         var now = Date.now();
-        var storage = JSON.parse(this.getStorage(key));
+        var tmpstorage = this.getStorage(key);
+        if (!tmpstorage) {
+            return false;
+        }
+        var storage = JSON.parse(tmpstorage);
         if(cache == 0){
             cache = 0;
         } else {
@@ -193,7 +161,7 @@ API.prototype = {
         });
     },
     /*
-     * 获取用户信息
+     * 获取我的信息
      */
     userInfo: function (opt, cache) {
         var self = this;
@@ -205,6 +173,21 @@ API.prototype = {
             url: self.env == "test" ? `${self.URL}/data/getUserInfo.json` : `${self.URL}/Api/user/getUserInfo`,
             data: opt,
             isAuth: true
+        }, key);
+    },
+    /*
+     * 获取用户信息
+     */
+    getUsers: function (opt, cache) {
+        var self = this;
+        if (!opt || !opt.userId) throw new Error("userId为必传的参数，或传入参数不合法");
+        var key = opt.userId + "userinfo";
+        if(this.isExpire(key, cache)) {
+            return self.cacheData(key);
+        }
+        return this.api({
+            url: self.env == "test" ? `${self.URL}/data/getUserInfo.json` : `${self.URL}/Api/user/userInfo`,
+            data: opt
         }, key);
     },
     /*
@@ -233,7 +216,8 @@ API.prototype = {
         }
         return this.api({
             url: self.env == "test" ? `${self.URL}/data/history.json` : `${self.URL}/Api/user/getHistory`,
-            data: opt
+            data: opt,
+            isAuth: true
         }, key);
     },
     /*
@@ -256,8 +240,11 @@ API.prototype = {
         var self = this;
         var key;
         if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
+        if (!opt.page) opt.page = 1;
         if (opt.movieId){
             key = opt.movieId + "comments";
+        } else if(opt.userId) {
+            key = opt.userId + "comment";
         } else {
             key = "homecomments";
         }
@@ -283,7 +270,8 @@ API.prototype = {
         }
         return this.api({
             url: self.env == "test" ? `${self.URL}/data/getMessageDetail.json` : `${self.URL}/Api/message/getMessageDetail`,
-            data: opt
+            data: opt,
+            isAuth: true
         }, key);
     },
     /*
@@ -297,7 +285,8 @@ API.prototype = {
         if (!opt || !opt.token) throw new Error("token为必传的参数，或传入参数不合法");
         return this.api({
             url: self.env == "test" ? `${self.URL}/data/sendMessage.json` : `${self.URL}/Api/message/sendMessage`,
-            data: opt
+            data: opt,
+            isAuth: true
         }, key, { push: true });
     },
     /*
@@ -313,7 +302,8 @@ API.prototype = {
         }
         return this.api({
             url: self.env == "test" ? `${self.URL}/data/getMessageList.json` : `${self.URL}/Api/message/getMessageList`,
-            data: opt
+            data: opt,
+            isAuth: true
         }, key);
     },
     /*
@@ -327,7 +317,8 @@ API.prototype = {
         if (!opt || !opt.typeId) throw new Error("typeId为必传的参数，或传入参数不合法");
         return this.api({
             url: self.env == "test" ? `${self.URL}/data/deletemessageList.json` : `${self.URL}/Api/message/delMessageList`,
-            data: opt
+            data: opt,
+            isAuth: true
         }, key, { delete: "typeId" });
     },
     /*
@@ -337,13 +328,13 @@ API.prototype = {
         var self = this;
         var key = "commentToMe";
         if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
-        if (!opt || !opt.token) throw new Error("token为必传的参数，或传入参数不合法");
         if(this.isExpire(key, cache) && opt.page == 1) {
             return self.cacheData(key);
         }
         return this.api({
             url: self.env == "test" ? `${self.URL}/data/commentToMe.json` : `${self.URL}/Api/comment/commentsToMe`,
-            data: opt
+            data: opt,
+            isAuth: true
         }, key);
     },
     /*
@@ -359,7 +350,8 @@ API.prototype = {
         }
         return this.api({
             url: self.env == "test" ? `${self.URL}/data/commentsDetail.json` : `${self.URL}/Api/comment/commentLikeMe`,
-            data: opt
+            data: opt,
+            isAuth: true
         }, key);
     },
     /*
@@ -375,7 +367,8 @@ API.prototype = {
         }
         return this.api({
             url: self.env == "test" ? `${self.URL}/data/commentsDetail.json` : `${self.URL}/Api/comment/userLikeMe`,
-            data: opt
+            data: opt,
+            isAuth: true
         }, key);
     },
     /*
@@ -385,13 +378,13 @@ API.prototype = {
         var self = this;
         var key = "myConmments";
         if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
-        if (!opt || !opt.token) throw new Error("token为必传的参数，或传入参数不合法");
         if(this.isExpire(key, cache) && opt.page == 1) {
             return self.cacheData(key);
         }
         return this.api({
             url: self.env == "test" ? `${self.URL}/data/getMyConmment.json` : `${self.URL}/Api/comment/myComments`,
-            data: opt
+            data: opt,
+            isAuth: true
         }, key);
     },
     /*
@@ -404,26 +397,46 @@ API.prototype = {
         if (!opt || !opt.token) throw new Error("token为必传的参数，或传入参数不合法");
         return this.api({
             url: self.env == "test" ? `${self.URL}/data/deleteMyConmment.json` : `${self.URL}/Api/message/delMyComments`,
-            data: opt
+            data: opt,
+            isAuth: true
         }, key, { delete: "_id" });
     },
     /*
      * 我关注的人
      */
-    myFocusList: function (opt) {
+    myFocusList: function (opt, cache) {
         var self = this;
         var key = "myFocus";
         if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
-        if (!opt || !opt.token) throw new Error("token为必传的参数，或传入参数不合法");
+        if(this.isExpire(key, cache) && opt.page == 1) {
+            return self.cacheData(key);
+        }
         return this.api({
             url: self.env == "test" ? `${self.URL}/data/getUserFocuslist.json` : `${self.URL}/Api/user/getUserFocuslist`,
-            data: opt
+            data: opt,
+            isAuth: true
+        }, key);
+    },
+    /*
+     * 我的粉丝
+     */
+    fansList: function (opt, cache) {
+        var self = this;
+        var key = "myFans";
+        if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
+        if(this.isExpire(key, cache) && opt.page == 1) {
+            return self.cacheData(key);
+        }
+        return this.api({
+            url: self.env == "test" ? `${self.URL}/data/getUserFocuslist.json` : `${self.URL}/Api/user/getUserFocusFromlist`,
+            data: opt,
+            isAuth: true
         }, key);
     },
     /*
      * 搜索电影
      */
-    movie: function (opt) {
+    movie: function (opt, cache) {
         var self = this;
         var key;
         if (opt.id) {
@@ -431,34 +444,28 @@ API.prototype = {
         } else {
             key = "movieList";
         }
+        if(this.isExpire(key, cache) && opt.page == 1) {
+            return self.cacheData(key);
+        }
         return this.api({
             url: self.env == "test" ? `${self.URL}/data/movieFindOne.json` : `${self.URL}/Api/movie/showMovieList`,
             data: opt
         }, key);
     },
     /*
-     * 电影的评论
-     */
-    commentByMovie: function (opt) {
-        var self = this;
-        var key = opt.id+"commentByMovie";
-        if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
-        return this.api({
-            url: self.env == "test" ? `${self.URL}/data/commentsDetail.json` : `${self.URL}/Api/comment/getComments`,
-            data: opt
-        }, key);
-    },
-    /*
      * 我的收藏
      */
-    getMyCollet: function (opt) {
+    getMyCollet: function (opt, cache) {
         var self = this;
         var key = "mycollet";
         if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
-        if (!opt || !opt.token) throw new Error("token为必传的参数，或传入参数不合法");
+        if(this.isExpire(key, cache) && opt.page == 1) {
+            return self.cacheData(key);
+        }
         return this.api({
             url: self.env == "test" ? `${self.URL}/data/getMyCollet.json` : `${self.URL}/Api/comment/getMyCollet`,
-            data: opt
+            data: opt,
+            isAuth: true
         }, key);
     },
     /*
@@ -476,8 +483,9 @@ API.prototype = {
         return this.api({
             url: self.env == "test" ? `${self.URL}/data/unCollet.json` : `${self.URL}/Api/comment/collet`,
             type: self.env == "test" ? "GET" : "POST",
-            data: opt
-        }, key, opt.type == "collet" ? { push: true } : { delete: "_id" });
+            data: opt,
+            isAuth: true
+        }, key, opt.type == "collet" ? {} : { delete: "_id" });
     },
     /*
      * 加关注
@@ -494,44 +502,42 @@ API.prototype = {
         return this.api({
             url: self.env == "test" ? `${self.URL}/data/focusUser.json` : `${self.URL}/Api/user/FocusUser`,
             type: self.env == "test" ? "GET" : "POST",
-            data: opt
-        }, key, opt.type == "focus" ? { push: true } : { delete: "_id" });
+            data: opt,
+            isAuth: true
+        }, key, opt.type == "focus" ? {} : { delete: "_id" });
     },
     /*
      * 注册
      */
     register: function (opt) {
         var self = this;
-        var key = "register";
         if (!opt || !opt.username) throw new Error("userName为必传的参数，或传入参数不合法");
         if (!opt || !opt.email) throw new Error("email为必传的参数，或传入参数不合法");
         if (!opt || !opt.password) throw new Error("password为必传的参数，或传入参数不合法");
         return this.api({
             url: self.env == "test" ? `${self.URL}/data/signup.json` : `${self.URL}/Api/user/signup`,
-            method:self.env == "test" ? "get" : "post",
+            method:self.env == "test" ? "get" : "POST",
             data: opt
-        }, key);
+        });
     },
     /*
      * 登录
      */
     login: function (opt) {
         var self = this;
-        var key = "login";
         if (!opt || !opt.email) throw new Error("email为必传的参数，或传入参数不合法");
         if (!opt || !opt.password) throw new Error("password为必传的参数，或传入参数不合法");
         return this.api({
             url: self.env == "test" ? `${self.URL}/data/signin.json` : `${self.URL}/Api/user/signin`,
-            method:self.env == "test" ? "get" : "post",
+            method:self.env == "test" ? "get" : "POST",
             data: opt
-        }, key);
+        });
     },
     /*
      * 搜索
      */
     search: function (opt) {
         var self = this;
-        var key = "search";
         let url = `${self.URL}/data/movieFindOne.json`;
         if (this.env == "test") {
             if (opt.commentTitle) {
@@ -546,15 +552,18 @@ API.prototype = {
         return this.api({
             url: url,
             data: opt
-        }, key);
+        });
     },
     /*
      * 评论详情
      */
-    commentsDetail: function (opt) {
+    commentsDetail: function (opt, cache) {
         var self = this;
         var key = `${opt.commentId}commentsDetail`;
         if (!opt || !opt.commentId) throw new Error("commentId为必传的参数，或传入参数不合法");
+        if(this.isExpire(key, cache) && opt.page == 1) {
+            return self.cacheData(key);
+        }
         return this.api({
             url: self.env == "test" ? `${self.URL}/data/commentsDetail.json` : `${self.URL}/Api/comment/commentsDetail`,
             data: opt
@@ -566,10 +575,12 @@ API.prototype = {
     star: function (opt) {
         var self = this;
         if (!opt || !opt.commentId) throw new Error("commentId为必传的参数，或传入参数不合法");
+        var key = `${opt.commentId}commentsDetail`;
         return this.api({
             url: self.env == "test" ? `${self.URL}/data/unCollet.json` : `${self.URL}/Api/comment/addLike`,
-            data: opt
-        });
+            data: opt,
+            isAuth: true
+        }, key);
     },
     /*
      * 评论电影
@@ -582,7 +593,8 @@ API.prototype = {
         if (!opt || !opt.rank) throw new Error("rank为必传的参数，或传入参数不合法");
         return this.api({
             url: self.env == "test" ? `${self.URL}/data/unCollet.json` : `${self.URL}/Api/comment/commentMovie`,
-            data: opt
+            data: opt,
+            isAuth: true
         });
     },
     /*
@@ -596,10 +608,33 @@ API.prototype = {
         if (!opt || !opt.content) throw new Error("content为必传的参数，或传入参数不合法");
         return this.api({
             url: self.env == "test" ? `${self.URL}/data/unCollet.json` : `${self.URL}/Api/comment/addComments`,
-            data: opt
+            data: opt,
+            isAuth: true
+        });
+    },
+    /*
+     * 拉黑用户
+     */
+    blacklist: function (opt) {
+        var self = this;
+        if (!opt || !opt.userId) throw new Error("userId为必传的参数，或传入参数不合法");
+        return this.api({
+            url: self.env == "test" ? `${self.URL}/data/unCollet.json` : `${self.URL}/Api/user/blackList`,
+            data: opt,
+            isAuth: true
+        });
+    },
+    /*
+     * 举报用户
+     */
+    reportUser: function (opt) {
+        var self = this;
+        if (!opt || !opt.userId) throw new Error("userId为必传的参数，或传入参数不合法");
+        return this.api({
+            url: self.env == "test" ? `${self.URL}/data/unCollet.json` : `${self.URL}/Api/user/reportUser`,
+            data: opt,
+            isAuth: true
         });
     }
-
-
 };
-module.exports = API;
+module.exports = Api;

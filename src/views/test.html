@@ -35,6 +35,76 @@
     <script src="http://cdn.bootcss.com/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
     <script>
         $(() => {
+            // 我关注的人
+            // $.ajax({
+            //     url:"http://localhost:8686/Api/user/getUserFocuslist",
+            //     type: 'GET',
+            //     dataType:'json',
+            //     data: {
+            //         page: 1
+            //     },
+            //     beforeSend:function(data){
+            //         data.setRequestHeader("authentication", $.cookie("test_token"));
+            //     }
+            // })
+            // 关注我的人
+            // $.ajax({
+            //     url:"http://localhost:8686/Api/user/getUserFocusFromlist",
+            //     type: 'GET',
+            //     dataType:'json',
+            //     data: {
+            //         page: 1
+            //     },
+            //     beforeSend:function(data){
+            //         data.setRequestHeader("authentication", $.cookie("test_token"));
+            //     }
+            // })
+            // 我的评论
+            // $.ajax({
+            //     url:"http://localhost:8686/Api/comment/myComments",
+            //     type: 'GET',
+            //     dataType:'json',
+            //     data: {
+            //         page: 1
+            //     },
+            //     beforeSend:function(data){
+            //         data.setRequestHeader("authentication", $.cookie("test_token"));
+            //     }
+            // })
+            // 评论我的
+            // $.ajax({
+            //     url:"http://localhost:8686/Api/comment/commentsToMe",
+            //     type: 'GET',
+            //     dataType:'json',
+            //     data: {
+            //         page: 1
+            //     },
+            //     beforeSend:function(data){
+            //         data.setRequestHeader("authentication", $.cookie("test_token"));
+            //     }
+            // })
+            // 浏览历史
+            $.ajax({
+                url:"http://localhost:8686/Api/user/getHistory",
+                type: 'GET',
+                dataType:'json',
+                data: {},
+                beforeSend:function(data){
+                    data.setRequestHeader("authentication", $.cookie("test_token"));
+                }
+            })
+            // 我收藏的
+            // $.ajax({
+            //     url:"http://localhost:8686/Api/comment/getMyCollet",
+            //     type: 'GET',
+            //     dataType:'json',
+            //     data: {
+            //         page: 1
+            //     },
+            //     beforeSend:function(data){
+            //         data.setRequestHeader("authentication", $.cookie("test_token"));
+            //     }
+            // })
             // 注册
             $("#register").on('click', () => {
                 console.log($("#username").val())
@@ -53,7 +123,7 @@
             //登录 
             $("#login").on('click', () => {
                 $.ajax({
-                    url:"http://localhost:8686/Api/user/signin",
+                    url:"http://dinge.v2.yoo.yunpro.cn:8686/Api/user/signin",
                     type: 'POST',
                     dataType:'json',
                     data: {
@@ -68,59 +138,59 @@
                 })
             })
             // 用户列表
-            $.ajax({
-                url:"http://localhost:8686/admin/api/getUserlist",
-                type: 'GET',
-                dataType:'json',
-                data: {
-                    page:1
-                }
-            })
-            .then((data) => {
-                var html = ''
-                data.data.list.forEach((v) => {
-                    html += "<li><p>ID: "+v._id+"</p><p>"+v.nickname+"<button data-id="+v._id+" class='focus'>关注</button></p></li>" 
-                })
-                $(html).appendTo($("#userlist"))
-                $(".focus").on('click', function() {
-                    const that = this
-                    $.ajax({
-                        url:"http://localhost:8686/Api/user/FocusUser",
-                        type: 'POST',
-                        dataType:'json',
-                        data: {
-                            userId:$(this).attr("data-id"),
-                            type: "focus",
-                            isList: false,
-                            page: 1
-                        },
-                        beforeSend:function(data){
-                            data.setRequestHeader("authentication", $.cookie("test_token"));
-                        }
-                    })
-                    .then((data) => {
-                        $("<button type='button' class='del_focus' data-id='"+$(that).attr("data-id")+"'>取消关注</button>").appendTo($(that).parent())
-                        $(".del_focus").on('click', function() {
-                            $.ajax({
-                                url:"http://localhost:8686/Api/user/FocusUser",
-                                type: 'POST',
-                                dataType:'json',
-                                data: {
-                                    userId:$(this).attr("data-id"),
-                                    type: "unfocus",
-                                    isList: false,
-                                    page: 1
-                                },
-                                beforeSend:function(data){
-                                    data.setRequestHeader("authentication", $.cookie("test_token"));
-                                }
-                            })
-                        })
-                    })
-                })
-            })
+            // $.ajax({
+            //     url:"http://localhost:8686/admin/api/getUserlist",
+            //     type: 'GET',
+            //     dataType:'json',
+            //     data: {
+            //         page:1
+            //     }
+            // })
+            // .then((data) => {
+            //     var html = ''
+            //     data.data.list.forEach((v) => {
+            //         html += "<li><p>ID: "+v._id+"</p><p>"+v.nickname+"<button data-id="+v._id+" class='focus'>关注</button></p></li>" 
+            //     })
+            //     $(html).appendTo($("#userlist"))
+            //     $(".focus").on('click', function() {
+            //         const that = this
+            //         $.ajax({
+            //             url:"http://localhost:8686/Api/user/FocusUser",
+            //             type: 'POST',
+            //             dataType:'json',
+            //             data: {
+            //                 userId:$(this).attr("data-id"),
+            //                 type: "focus",
+            //                 isList: false,
+            //                 page: 1
+            //             },
+            //             beforeSend:function(data){
+            //                 data.setRequestHeader("authentication", $.cookie("test_token"));
+            //             }
+            //         })
+            //         .then((data) => {
+            //             $("<button type='button' class='del_focus' data-id='"+$(that).attr("data-id")+"'>取消关注</button>").appendTo($(that).parent())
+            //             $(".del_focus").on('click', function() {
+            //                 $.ajax({
+            //                     url:"http://localhost:8686/Api/user/FocusUser",
+            //                     type: 'POST',
+            //                     dataType:'json',
+            //                     data: {
+            //                         userId:$(this).attr("data-id"),
+            //                         type: "unfocus",
+            //                         isList: false,
+            //                         page: 1
+            //                     },
+            //                     beforeSend:function(data){
+            //                         data.setRequestHeader("authentication", $.cookie("test_token"));
+            //                     }
+            //                 })
+            //             })
+            //         })
+            //     })
+            // })
             // 点击评论
-            $("#commentBtn").on('click', function() {
+            /*$("#commentBtn").on('click', function() {
                 const title = $("#comment").val()
                 $.ajax({
                     url:"http://localhost:8686/Api/comment/commentMovie",
@@ -136,58 +206,58 @@
                         data.setRequestHeader("authentication", $.cookie("test_token"));
                     }
                 })
-            })
+            })*/
             // 评论列表
-            $.ajax({
-                url:"http://localhost:8686/Api/comment/getComments",
-                type: 'GET',
-                dataType:'json',
-                data: {
-                    movieId: "58495dc8b7450206fc07aaf7",
-                    page:1
-                },
-                beforeSend:function(data){
-                    data.setRequestHeader("authentication", $.cookie("test_token"));
-                }
-            })
-            .then((data) => {
-                let html = ''
-                data.data.list.forEach((v) => {
-                    html += "<li><p>评论ID: "+v._id+"，电影Id: "+v.movie+", 用户ID： "+v.commentFrom._id+"</p><p>评论title: "+v.title+", 评论内容: "+v.content+"</p><button class='collet' data-id="+v._id+">收藏</button><button class='uncollet' data-id="+v._id+">取消收藏</button><button data-id="+v._id+" class='star'>点赞</button></li>" 
-                })
-                $(html).appendTo($("#userlist"))
-                $(".collet").click(function(){
-                    $.ajax({
-                        url:"http://localhost:8686/Api/comment/collet",
-                        type: 'POST',
-                        dataType:'json',
-                        data: {
-                            commentId:"585a1ea571352b1d6c895c90"
-                        },
-                        beforeSend:function(data){
-                            data.setRequestHeader("authentication", $.cookie("test_token"));
-                        }
-                    })
-                })
-                $(".uncollet").click(function(){
-                    $.ajax({
-                        url:"http://localhost:8686/Api/comment/collet",
-                        type: 'POST',
-                        dataType:'json',
-                        data: {
-                            commentId:"585a1ea571352b1d6c895c90",
-                            type: "uncollet",
-                            isList: true,
-                            page: 1
-                        },
-                        beforeSend:function(data){
-                            data.setRequestHeader("authentication", $.cookie("test_token"));
-                        }
-                    })
-                })
-            })
+            // $.ajax({
+            //     url:"http://localhost:8686/Api/comment/getComments",
+            //     type: 'GET',
+            //     dataType:'json',
+            //     data: {
+            //         movieId: "58495dc8b7450206fc07aaf7",
+            //         page:1
+            //     },
+            //     beforeSend:function(data){
+            //         data.setRequestHeader("authentication", $.cookie("test_token"));
+            //     }
+            // })
+            // .then((data) => {
+            //     let html = ''
+            //     data.data.list.forEach((v) => {
+            //         html += "<li><p>评论ID: "+v._id+"，电影Id: "+v.movie+", 用户ID： "+v.commentFrom._id+"</p><p>评论title: "+v.title+", 评论内容: "+v.content+"</p><button class='collet' data-id="+v._id+">收藏</button><button class='uncollet' data-id="+v._id+">取消收藏</button><button data-id="+v._id+" class='star'>点赞</button></li>" 
+            //     })
+            //     $(html).appendTo($("#userlist"))
+            //     $(".collet").click(function(){
+            //         $.ajax({
+            //             url:"http://localhost:8686/Api/comment/collet",
+            //             type: 'POST',
+            //             dataType:'json',
+            //             data: {
+            //                 commentId:"585a1ea571352b1d6c895c90"
+            //             },
+            //             beforeSend:function(data){
+            //                 data.setRequestHeader("authentication", $.cookie("test_token"));
+            //             }
+            //         })
+            //     })
+            //     $(".uncollet").click(function(){
+            //         $.ajax({
+            //             url:"http://localhost:8686/Api/comment/collet",
+            //             type: 'POST',
+            //             dataType:'json',
+            //             data: {
+            //                 commentId:"585a1ea571352b1d6c895c90",
+            //                 type: "uncollet",
+            //                 isList: true,
+            //                 page: 1
+            //             },
+            //             beforeSend:function(data){
+            //                 data.setRequestHeader("authentication", $.cookie("test_token"));
+            //             }
+            //         })
+            //     })
+            // })
             // 评论用户
-            $("#commentUserBtn").on('click', function(){
+            /*$("#commentUserBtn").on('click', function(){
                 $.ajax({
                     url:"http://localhost:8686/Api/comment/addComments",
                     type: 'POST',
@@ -202,9 +272,9 @@
                         data.setRequestHeader("authentication", $.cookie("test_token"));
                     }
                 })
-            })
+            })*/
             // 查看评论详情
-            $.ajax({
+            /*$.ajax({
                 url:"http://localhost:8686/Api/comment/commentsDetail",
                 type: 'GET',
                 dataType:'json',
@@ -215,8 +285,35 @@
             })
             .then((data) => {
                 console.log("data", data)
+            })*/
+            // 查看他人信息
+            // $.ajax({
+            //     url:"http://localhost:8686/Api/user/userinfo",
+            //     type: 'GET',
+            //     dataType:'json',
+            //     data: {
+            //         userId: "5853bae535aa9e0dbd63cd11",
+            //     },
+            //     beforeSend:function(data){
+            //         data.setRequestHeader("authentication", $.cookie("test_token"));
+            //     }
+            // })
+            // .then((data) => {
+            //     console.log("data", data)
+            // })
+            // 查看他人影评
+            $.ajax({
+                url:"http://localhost:8686/Api/comment/getComments",
+                type: 'GET',
+                dataType:'json',
+                data: {
+                    userId: "5853bb3e56ab520e01ed08cf",
+                    page: 1
+                }
             })
-            
+            .then((data) => {
+                console.log("data", data)
+            })
         })
     </script>
 </body>

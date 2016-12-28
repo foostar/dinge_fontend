@@ -260,7 +260,7 @@ var DingeTools = {
         return fmt;
     }
 };
-var tools = $.extend({}, DingeTools, Api);
+const tools = $.extend({}, DingeTools, Api);
 function objCreat(proto){
     function Create(){}
     Create.prototype = proto;
