@@ -11,25 +11,21 @@ $(() => {
     Home.prototype.constructor = Home;
     //渲染页面
     Home.prototype.render = function(){
-        Promise.all([ this.loadingBanner(),this.getTemplate() ])
-        .then(() => {
-            $("#loading").hide();
-        });
+        this.loadingBanner();
+        this.getTemplate();
     };
     Home.prototype.loadingBanner = function(){
         //轮播图部分
         return new Promise((resolve, reject) => {
-            dingeTools.banner({}, -1)
+            dingeTools.banner({})
             .then((result) => {
                 var html = "";
-                if(result.status == 1 && result.data.list.length>0){
-                    var data = result.data.list;
+                if(result.status == 1 && result.data.length>0){
+                    var data = result.data;
                     data.forEach((item) => {
-                        html += "<div class='swiper-slide'><a class='pic' href='javascript://'><img src="+item.url+" alt=''/></a></div>";
+                        html += "<div class='swiper-slide'><a class='pic' href='javascript://'><img src="+item.content+" alt=''/></a></div>";
                     });
                     $(html).appendTo($(".swiper-wrapper"));
-                }
-                if(result.status == 1){
                     new Swiper(".swiper-container",{
                         direction:"horizontal",//横向滑动
                         loop:true,//形成环路（即：可以从最后一张图跳转到第一张图
@@ -39,8 +35,8 @@ $(() => {
                         autoplay:3000//每隔3秒自动播放
 
                     });
+                    resolve();
                 }
-                resolve();
             }, (err) => {
                 reject(err);
             });
@@ -50,8 +46,9 @@ $(() => {
         this.page++;
         return dingeTools.comments({
             page: this.page,
-            pageSize: this.pageSize
-        }, 0);
+            pageSize: this.pageSize,
+            rights: 90
+        });
     };
     Home.prototype.getTemplate = function(){
         return new Promise((resolve, reject) => {
@@ -65,7 +62,7 @@ $(() => {
                         html+=" home_comment_right";
                     }
                     html +=  "'>"
-                                +"<img class='home_comment_img flex-normal' src='"+item.movie.images.small+"' alt=''>"
+                                +"<img class='home_comment_img flex-normal' src='"+item.movie.images.large+"' alt=''>"
                                 +"<div class='home_comment flex-normal'>"
                                     +"<div class='home_comment_author font-normal'>"
                                         +"<em>"+dingeTools.fromNow(item.createdAt)+"</em>"
@@ -74,8 +71,8 @@ $(() => {
                                     +"<div class='home_comment_title'>"+item.content+"</div>"
                                     +"<div class='flex-container home_comment_meta font-normal'>"
                                         +"<div class='flex-normal'>阅读<span>"+item.reading+"</span></div>"
-                                        +"<div class='flex-normal'>评论<span>"+item.rank+"</span></div>"
-                                        +"<div class='flex-normal'>喜欢<span>"+item.weight+"</span></div>"
+                                        +"<div class='flex-normal'>评论<span>"+item.reply.length+"</span></div>"
+                                        +"<div class='flex-normal'>喜欢<span>"+item.star.length+"</span></div>"
                                     +"</div>"
                                 +"</div>"
                             +"</div>";

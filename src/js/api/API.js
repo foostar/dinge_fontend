@@ -589,6 +589,10 @@ Api.prototype = {
         if (!opt || !opt.content) throw new Error("content为必传的参数，或传入参数不合法");
         if (!opt || !opt.movie) throw new Error("movie为必传的参数，或传入参数不合法");
         if (!opt || !opt.rank) throw new Error("rank为必传的参数，或传入参数不合法");
+        var storge = [ "homecomments", opt.movie+"comments", "myConmments" ];
+        storge.forEach((v) => {
+            this.removeStorage(v);
+        });
         return this.api({
             url: self.env == "test" ? `${self.URL}/data/unCollet.json` : `${self.URL}/Api/comment/commentMovie`,
             data: opt,

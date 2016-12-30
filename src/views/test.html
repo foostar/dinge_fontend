@@ -31,10 +31,26 @@
         <input type="text" id="chat">
         <button id="chatBtn" type="button">提交</button>
     </form>
+    <button type="button" id="savecarousel">增加banner</button>
     <script src="http://cdn.bootcss.com/jquery/1.12.0/jquery.min.js"></script>
     <script src="http://cdn.bootcss.com/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
     <script>
         $(() => {
+            $("#savecarousel").click(function(){
+                $.ajax({
+                    url:"http://localhost:8686/admin/api/common/addCarousel",
+                    type: 'POST',
+                    dataType:'json',
+                    data: {
+                        title: "库日天",
+                        content: "/images/titlePic/111.jpg",
+                        url: "#"
+                    },
+                    beforeSend:function(data){
+                        data.setRequestHeader("authentication", $.cookie("test_token"));
+                    }
+                })
+            })
             // 我关注的人
             // $.ajax({
             //     url:"http://localhost:8686/Api/user/getUserFocuslist",
