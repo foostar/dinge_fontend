@@ -344,12 +344,11 @@ Api.prototype = {
         var self = this;
         var key = "commentLikeMe";
         if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
-        if (!opt || !opt.token) throw new Error("token为必传的参数，或传入参数不合法");
         if(this.isExpire(key, cache) && opt.page == 1) {
             return self.cacheData(key);
         }
         return this.api({
-            url: self.env == "test" ? `${self.URL}/data/commentsDetail.json` : `${self.URL}/Api/comment/commentLikeMe`,
+            url: self.env == "test" ? `${self.URL}/data/commentsDetail.json` : `${self.URL}/Api/comment/zanList`,
             data: opt,
             isAuth: true
         }, key);
@@ -361,12 +360,11 @@ Api.prototype = {
         var self = this;
         var key = "userLikeMe";
         if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
-        if (!opt || !opt.token) throw new Error("token为必传的参数，或传入参数不合法");
         if(this.isExpire(key, cache) && opt.page == 1) {
             return self.cacheData(key);
         }
         return this.api({
-            url: self.env == "test" ? `${self.URL}/data/commentsDetail.json` : `${self.URL}/Api/comment/userLikeMe`,
+            url: self.env == "test" ? `${self.URL}/data/commentsDetail.json` : `${self.URL}/Api/user/getUserFocusFromlist`,
             data: opt,
             isAuth: true
         }, key);

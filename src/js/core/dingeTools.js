@@ -187,7 +187,8 @@ var DingeTools = {
     },
     // 向上返回
     goBack:function(){
-        $(".goback").on("tap", function(){
+        $(".goback").on("touchend", function(){
+            event.preventDefault();
             window.history.back();
         });
     },
