@@ -27,7 +27,7 @@ const Components = require("./components/components");
                 if(type == "login") {
                     Cookie.set("dinge", data.token);
                     Cookie.set("dingeId", data.userId.toString());
-                    return window.location.href = "/views/user.html";
+                    return window.location.href = "http://localhost:3080/views/user.html";
                 }
                 window.location.href = "/views/login.html";
             })

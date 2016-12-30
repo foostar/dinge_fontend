@@ -18,7 +18,7 @@ const Swiper = require("Swiper");
             this.render();
         },
         getTemplate(item){
-            return "<div class='info_large'>"
+            return "<div class='info_large info_media'>"
                         +"<div class='info_slide'>"
                             +"<div class='mescomment_carouse'>"
                                 +"<a href='javascript:;'>"

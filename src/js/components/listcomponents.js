@@ -11,6 +11,8 @@ function Listcomponents (opt) {
     this.hasBack = opt.hasBack || true;
     this.holdPosition = 0;
     this.page = 1;
+    this.pageSize = opt.pageSize || 10;
+    this.over = false;
     this.mySwiper = "";
     this.ele = $("#"+opt.id);
 }
@@ -91,6 +93,7 @@ Listcomponents.prototype.makeData = function (result) {
     let html = "";
     if(result.status == 1 &&  result.data.list.length>0) {
         let data = result.data.list;
+        this.over = result.totalNum > (this.page * this.pageSize) ? false : true;
         data.forEach((item) => {
             html += "<div class='swiper-slide'>"+getTemplate(item)+"</div>";
         });
@@ -121,6 +124,7 @@ Listcomponents.prototype.initSwiper = function (result) {
         onTouchEnd(){
             if (self.holdPosition < 100) return;
             if (!self.hasNext) return;
+            if (self.over) return;
             // 准备加载新的slider
             const swiperHeight = $(".swiper-wrapper").height();
             const containerHeight = self.mySwiper.height;
@@ -133,6 +137,7 @@ Listcomponents.prototype.initSwiper = function (result) {
             fetchData(self.page)
             .then((result) => {
                 if(result.status == 1 && result.data.list.length>0){
+                    self.over = result.totalNum > (self.page * self.pageSize) ? false : true;
                     var data = result.data.list;
                     data.forEach((item) => {
                         var template = getTemplate(item);

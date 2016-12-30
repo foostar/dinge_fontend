@@ -187,7 +187,8 @@ var DingeTools = {
     },
     // 向上返回
     goBack:function(){
-        $(".goback").on("tap", function(){
+        $(".goback").on("touchend", function(){
+            event.preventDefault();
             window.history.back();
         });
     },
@@ -260,7 +261,7 @@ var DingeTools = {
         return fmt;
     }
 };
-var tools = $.extend({}, DingeTools, Api);
+const tools = $.extend({}, DingeTools, Api);
 function objCreat(proto){
     function Create(){}
     Create.prototype = proto;

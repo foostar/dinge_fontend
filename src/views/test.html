@@ -31,10 +31,96 @@
         <input type="text" id="chat">
         <button id="chatBtn" type="button">提交</button>
     </form>
+    <button type="button" id="savecarousel">增加banner</button>
     <script src="http://cdn.bootcss.com/jquery/1.12.0/jquery.min.js"></script>
     <script src="http://cdn.bootcss.com/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
     <script>
         $(() => {
+            $("#savecarousel").click(function(){
+                $.ajax({
+                    url:"http://localhost:8686/admin/api/common/addCarousel",
+                    type: 'POST',
+                    dataType:'json',
+                    data: {
+                        title: "库日天",
+                        content: "/images/titlePic/111.jpg",
+                        url: "#"
+                    },
+                    beforeSend:function(data){
+                        data.setRequestHeader("authentication", $.cookie("test_token"));
+                    }
+                })
+            })
+            // 我关注的人
+            // $.ajax({
+            //     url:"http://localhost:8686/Api/user/getUserFocuslist",
+            //     type: 'GET',
+            //     dataType:'json',
+            //     data: {
+            //         page: 1
+            //     },
+            //     beforeSend:function(data){
+            //         data.setRequestHeader("authentication", $.cookie("test_token"));
+            //     }
+            // })
+            // 关注我的人
+            // $.ajax({
+            //     url:"http://localhost:8686/Api/user/getUserFocusFromlist",
+            //     type: 'GET',
+            //     dataType:'json',
+            //     data: {
+            //         page: 1
+            //     },
+            //     beforeSend:function(data){
+            //         data.setRequestHeader("authentication", $.cookie("test_token"));
+            //     }
+            // })
+            // 我的评论
+            // $.ajax({
+            //     url:"http://localhost:8686/Api/comment/myComments",
+            //     type: 'GET',
+            //     dataType:'json',
+            //     data: {
+            //         page: 1
+            //     },
+            //     beforeSend:function(data){
+            //         data.setRequestHeader("authentication", $.cookie("test_token"));
+            //     }
+            // })
+            // 评论我的
+            // $.ajax({
+            //     url:"http://localhost:8686/Api/comment/commentsToMe",
+            //     type: 'GET',
+            //     dataType:'json',
+            //     data: {
+            //         page: 1
+            //     },
+            //     beforeSend:function(data){
+            //         data.setRequestHeader("authentication", $.cookie("test_token"));
+            //     }
+            // })
+            // 浏览历史
+            $.ajax({
+                url:"http://localhost:8686/Api/user/getHistory",
+                type: 'GET',
+                dataType:'json',
+                data: {},
+                beforeSend:function(data){
+                    data.setRequestHeader("authentication", $.cookie("test_token"));
+                }
+            })
+            // 我收藏的
+            // $.ajax({
+            //     url:"http://localhost:8686/Api/comment/getMyCollet",
+            //     type: 'GET',
+            //     dataType:'json',
+            //     data: {
+            //         page: 1
+            //     },
+            //     beforeSend:function(data){
+            //         data.setRequestHeader("authentication", $.cookie("test_token"));
+            //     }
+            // })
             // 注册
             $("#register").on('click', () => {
                 console.log($("#username").val())
@@ -68,59 +154,59 @@
                 })
             })
             // 用户列表
-            $.ajax({
-                url:"http://localhost:8686/admin/api/getUserlist",
-                type: 'GET',
-                dataType:'json',
-                data: {
-                    page:1
-                }
-            })
-            .then((data) => {
-                var html = ''
-                data.data.list.forEach((v) => {
-                    html += "<li><p>ID: "+v._id+"</p><p>"+v.nickname+"<button data-id="+v._id+" class='focus'>关注</button></p></li>" 
-                })
-                $(html).appendTo($("#userlist"))
-                $(".focus").on('click', function() {
-                    const that = this
-                    $.ajax({
-                        url:"http://localhost:8686/Api/user/FocusUser",
-                        type: 'POST',
-                        dataType:'json',
-                        data: {
-                            userId:$(this).attr("data-id"),
-                            type: "focus",
-                            isList: false,
-                            page: 1
-                        },
-                        beforeSend:function(data){
-                            data.setRequestHeader("authentication", $.cookie("test_token"));
-                        }
-                    })
-                    .then((data) => {
-                        $("<button type='button' class='del_focus' data-id='"+$(that).attr("data-id")+"'>取消关注</button>").appendTo($(that).parent())
-                        $(".del_focus").on('click', function() {
-                            $.ajax({
-                                url:"http://localhost:8686/Api/user/FocusUser",
-                                type: 'POST',
-                                dataType:'json',
-                                data: {
-                                    userId:$(this).attr("data-id"),
-                                    type: "unfocus",
-                                    isList: false,
-                                    page: 1
-                                },
-                                beforeSend:function(data){
-                                    data.setRequestHeader("authentication", $.cookie("test_token"));
-                                }
-                            })
-                        })
-                    })
-                })
-            })
+            // $.ajax({
+            //     url:"http://localhost:8686/admin/api/getUserlist",
+            //     type: 'GET',
+            //     dataType:'json',
+            //     data: {
+            //         page:1
+            //     }
+            // })
+            // .then((data) => {
+            //     var html = ''
+            //     data.data.list.forEach((v) => {
+            //         html += "<li><p>ID: "+v._id+"</p><p>"+v.nickname+"<button data-id="+v._id+" class='focus'>关注</button></p></li>" 
+            //     })
+            //     $(html).appendTo($("#userlist"))
+            //     $(".focus").on('click', function() {
+            //         const that = this
+            //         $.ajax({
+            //             url:"http://localhost:8686/Api/user/FocusUser",
+            //             type: 'POST',
+            //             dataType:'json',
+            //             data: {
+            //                 userId:$(this).attr("data-id"),
+            //                 type: "focus",
+            //                 isList: false,
+            //                 page: 1
+            //             },
+            //             beforeSend:function(data){
+            //                 data.setRequestHeader("authentication", $.cookie("test_token"));
+            //             }
+            //         })
+            //         .then((data) => {
+            //             $("<button type='button' class='del_focus' data-id='"+$(that).attr("data-id")+"'>取消关注</button>").appendTo($(that).parent())
+            //             $(".del_focus").on('click', function() {
+            //                 $.ajax({
+            //                     url:"http://localhost:8686/Api/user/FocusUser",
+            //                     type: 'POST',
+            //                     dataType:'json',
+            //                     data: {
+            //                         userId:$(this).attr("data-id"),
+            //                         type: "unfocus",
+            //                         isList: false,
+            //                         page: 1
+            //                     },
+            //                     beforeSend:function(data){
+            //                         data.setRequestHeader("authentication", $.cookie("test_token"));
+            //                     }
+            //                 })
+            //             })
+            //         })
+            //     })
+            // })
             // 点击评论
-            $("#commentBtn").on('click', function() {
+            /*$("#commentBtn").on('click', function() {
                 const title = $("#comment").val()
                 $.ajax({
                     url:"http://localhost:8686/Api/comment/commentMovie",
@@ -136,8 +222,8 @@
                         data.setRequestHeader("authentication", $.cookie("test_token"));
                     }
                 })
-            })
-            // 评论列表
+            })*/
+            //评论列表
             $.ajax({
                 url:"http://localhost:8686/Api/comment/getComments",
                 type: 'GET',
@@ -185,9 +271,23 @@
                         }
                     })
                 })
+                $(".star").click(function(){
+                    $.ajax({
+                        url:"http://localhost:8686/Api/comment/addLike",
+                        type: 'POST',
+                        dataType:'json',
+                        data: {
+                            commentId:"585a1ea571352b1d6c895c90",
+                            zanTo: "5853bb3e56ab520e01ed08cf",
+                        },
+                        beforeSend:function(data){
+                            data.setRequestHeader("authentication", $.cookie("test_token"));
+                        }
+                    })
+                })
             })
             // 评论用户
-            $("#commentUserBtn").on('click', function(){
+            /*$("#commentUserBtn").on('click', function(){
                 $.ajax({
                     url:"http://localhost:8686/Api/comment/addComments",
                     type: 'POST',
@@ -202,9 +302,9 @@
                         data.setRequestHeader("authentication", $.cookie("test_token"));
                     }
                 })
-            })
+            })*/
             // 查看评论详情
-            $.ajax({
+            /*$.ajax({
                 url:"http://localhost:8686/Api/comment/commentsDetail",
                 type: 'GET',
                 dataType:'json',
@@ -215,8 +315,38 @@
             })
             .then((data) => {
                 console.log("data", data)
+            })*/
+            // 查看他人信息
+            // $.ajax({
+            //     url:"http://localhost:8686/Api/user/userinfo",
+            //     type: 'GET',
+            //     dataType:'json',
+            //     data: {
+            //         userId: "5853bae535aa9e0dbd63cd11",
+            //     },
+            //     beforeSend:function(data){
+            //         data.setRequestHeader("authentication", $.cookie("test_token"));
+            //     }
+            // })
+            // .then((data) => {
+            //     console.log("data", data)
+            // })
+            // 查看他人影评
+            $.ajax({
+                url:"http://localhost:8686/Api/comment/getComments",
+                type: 'GET',
+                dataType:'json',
+                data: {
+                    userId: "5853bb3e56ab520e01ed08cf",
+                    page: 1
+                },
+                beforeSend:function(data){
+                    data.setRequestHeader("authentication", $.cookie("test_token"));
+                }
             })
-            
+            .then((data) => {
+                console.log("data", data)
+            })
         })
     </script>
 </body>
