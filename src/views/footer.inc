@@ -1,7 +1,7 @@
 <footer>
     <ul class="footer flex-container">
         <li class="flex-normal">
-            <a href="home.html" class="active font-normal">
+            <a href="home.html" class="font-normal">
                 <div class="font-super iconfont icon-homeH"></div>
                 首页
             </a>

@@ -16,7 +16,6 @@ var DingeTools = {
     getURLParam:function (key){
         var  url=  window.location;
         var  paramStrArr= url.href.split('?');
-     // alert(params[1]);
      if(paramStrArr.length>=2&&paramStrArr[1]!=""){
        var  paramStr=paramStrArr[1];
           var  paramArr = paramStr.split('&');
@@ -141,6 +140,31 @@ var DingeTools = {
     },
     //  初始化底层font-size
     init:function(){
+        const locationMap = {
+            home: 0,
+            find: 1,
+            moviedetails: 1,
+            comment:1,
+            write:1,
+            message:2,
+            messagelist:2,
+            messages:2,
+            messages_comment:2,
+            messages_fans:2,
+            messages_like:2,
+            user:3,
+            edit_user:3,
+            other_means:3,
+            mycollet:3,
+            history:3,
+            myfocus:3,
+            mycomment:3
+        }
+        var href = window.location.href
+        var key = href.substring(href.lastIndexOf("/")+1, href.lastIndexOf("."))
+        if ($(".footer")) {
+            $(".footer").find("a").eq(locationMap[key]).addClass("active")
+        }
         var evt = "onorientationchange" in window ? "orientationchange" : "resize"
         var remPage = function(){
             document.documentElement.style.fontSize = document.documentElement.clientWidth / 6.4 + 'px';

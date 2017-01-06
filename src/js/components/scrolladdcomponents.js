@@ -11,7 +11,7 @@ Scrolladdcomponents.prototype.constructor = Scrolladdcomponents;
 Scrolladdcomponents.prototype.bindEvent = function(){
     this.scrollDir({
         up : (x) => {
-            if(x <= 0){
+            if(x <= 20){
                 this.getTemplate();
             }
         }
