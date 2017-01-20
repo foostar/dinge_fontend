@@ -31,7 +31,8 @@ $(() => {
     Find.prototype.bindEvent = function () {
         //点击搜索跳转搜索Ajax.load
         $("#search").on("touchend", function() {
-            window.location.href = `search.html?name=${encodeURIComponent($(".search_item").eq(0).find("span").html())}`;
+            let searchValue = $(".search_item").eq(0).find("span").html() || "";
+            window.location.href = `search.html?name=${encodeURIComponent(searchValue)}`;
         });
     };
     const search = new Find({
