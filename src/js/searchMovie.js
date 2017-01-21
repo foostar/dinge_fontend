@@ -9,7 +9,7 @@ $(() => {
         this.init();
     }
     SearchMovie.prototype ={
-        active: "movie",
+        active: JSON.parse(dingeTools.getStorage("searchMovie")).active || "movie",
         init () {
             dingeTools.init();
             this.render();
@@ -17,6 +17,7 @@ $(() => {
         },
         render () {
             $(".search_mov").val(decodeURIComponent(dingeTools.getURLParam("name")));
+            $(`#tag_${this.active}`).addClass("current");
             this.renderModule();
         },
         renderModule () {
@@ -126,11 +127,14 @@ $(() => {
         },
         tab () {
             //选项卡点击事件
-            $("#tag li").click((event) => {
-                let index = $(event.target).index();
+            $("#tag").on("touchend", (e)=> {
+                let currentElem = e.target;
+                let index = $(currentElem).index();
+                let active = index === 0 ? "movie" : index ===1 ? "comment" : "user";
                 $("#tag li").eq(index).addClass("current").siblings().removeClass("current");
                 $(".tagClass").hide().eq(index).show();
-                this.active = index === 0 ? "movie" : index ===1 ? "comment" : "user";
+                this.active = active;
+                dingeTools.setStorage("searchMovie", JSON.stringify({active}));
                 this.formatSearch()
                 .then(() => {
                     this.reviewModule();
