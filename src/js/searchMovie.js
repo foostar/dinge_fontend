@@ -9,17 +9,17 @@ $(() => {
         this.init();
     }
     SearchMovie.prototype ={
-        active:"movie",
-        init(){
+        active: "movie",
+        init () {
             dingeTools.init();
             this.render();
             this.bindEvent();
         },
-        render(){
+        render () {
             $(".search_mov").val(decodeURIComponent(dingeTools.getURLParam("name")));
             this.renderModule();
         },
-        renderModule() {
+        renderModule () {
             if (this.active == "movie") {
                 this.movieModule();
             } else if(this.active == "comment") {
@@ -28,7 +28,7 @@ $(() => {
                 this.userModule(); 
             }
         },
-        search(){
+        search () {
             $(".search i").click(() => {
                 $("form").submit();
             });
@@ -42,12 +42,12 @@ $(() => {
                 });
             });
         },
-        bindEvent(){
+        bindEvent () {
             this.search();
             this.cancel();
             this.tab();
         },
-        formatSearch() {
+        formatSearch () {
             return new Promise((reslove, reject) => {
                 if (!$(".search_mov").val()) {
                     return reject({ msg: "搜索项不能为空！" });
@@ -61,7 +61,7 @@ $(() => {
                 reslove();
             });
         },
-        movieModule(){
+        movieModule () {
             //电影模块
             dingeTools.search({
                 movieName:$(".search_mov").val()
@@ -83,7 +83,7 @@ $(() => {
                 }
             });
         },
-        reviewModule(){
+        reviewModule () {
             //影评模块
             dingeTools.search({
                 commentTitle:$(".search_mov").val()
@@ -105,7 +105,7 @@ $(() => {
                 }
             });
         },
-        userModule(){
+        userModule () {
             dingeTools.search({
                 userName:$(".search_mov").val()
             })
@@ -124,21 +124,13 @@ $(() => {
                 }
             });
         },
-        tab(){
+        tab () {
             //选项卡点击事件
             $("#tag li").click((event) => {
-                $("#tag li").eq($(event.target).index()).addClass("current").siblings().removeClass("current");
-                $(".tagClass").hide().eq($(event.target).index()).show();
-                switch($(event.target).index()) {
-                    case 0:
-                        this.active = "movie";
-                        break;
-                    case 1:
-                        this.active = "comment";
-                        break;
-                    default:
-                        this.active = "user";
-                }
+                let index = $(event.target).index();
+                $("#tag li").eq(index).addClass("current").siblings().removeClass("current");
+                $(".tagClass").hide().eq(index).show();
+                this.active = index === 0 ? "movie" : index ===1 ? "comment" : "user";
                 this.formatSearch()
                 .then(() => {
                     this.reviewModule();
@@ -147,7 +139,7 @@ $(() => {
                 });
             });
         },
-        cancel(){
+        cancel () {
             //点击取消触发事件
             $("#search_cancel").click(() => {
                 window.location.href="find.html";
