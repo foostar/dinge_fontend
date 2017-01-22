@@ -17,7 +17,6 @@ $(() => {
         },
         render () {
             $(".search_mov").val(decodeURIComponent(dingeTools.getURLParam("name")));
-            $(`#tag_${this.active}`).addClass("current");
             this.renderModule();
         },
         renderModule () {
@@ -73,7 +72,7 @@ $(() => {
                     $("#searchMovie_movie").html("");
                     let data = res.data.list;   
                     data.forEach((v) => {
-                        let monent = v.releaseTime.substr(0, 10);
+                        let monent = v.releasetime.substr(0, 10);
                         let directors = "";
                         v.directors.forEach((d) => {
                             directors += `<em class='font-normal'>${d.name}</em>`;
@@ -114,11 +113,13 @@ $(() => {
                 $("#searchMovie_movie").html("");
                 let html = "";
                 if(res.status == 1){
-                    let data = res.data.list;           
+                    let data = res.data.list;   
                     for(let i=0;i<data.length;i++){
-                        html += "<ul class='movie_user' data-id="+data[ i ]._id+">"
-                                    +"<li class='user_img'><a href='javascript:;'><img src="+data[ i ].avatar+" alt=''></a></li>"
-                                    +"<li class='user_txt font-h'>"+data[ i ].nickname+"</li>"        
+                        let item = data[ i ];
+                        let commentFromItem = item.commentFrom;
+                        html += "<ul class='movie_user' data-id="+item._id+">"
+                                    +"<li class='user_img'><a href='javascript:;'><img src="+commentFromItem.avatar+" alt=''></a></li>"
+                                    +"<li class='user_txt font-h'>"+commentFromItem.nickname+"</li>"        
                                 +"</ul>";
                     }
                     $(html).appendTo($("#searchMovie_user"));
