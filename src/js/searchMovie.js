@@ -6,10 +6,10 @@ $(() => {
     searchMovie page tab 切换
     */
     function SearchMovie(){
+        this.active = "movie";
         this.init();
     }
     SearchMovie.prototype ={
-        active: JSON.parse(dingeTools.getStorage("searchMovie")).active || "movie",
         init () {
             dingeTools.init();
             this.render();
@@ -134,10 +134,9 @@ $(() => {
                 $("#tag li").eq(index).addClass("current").siblings().removeClass("current");
                 $(".tagClass").hide().eq(index).show();
                 this.active = active;
-                dingeTools.setStorage("searchMovie", JSON.stringify({active}));
                 this.formatSearch()
                 .then(() => {
-                    this.reviewModule();
+                    this.renderModule();
                 }, err => {
                     console.log(err);
                 });
