@@ -1,5 +1,7 @@
 const $ = require("Zepto");
 const dingeTools = require("dingeTools");
+/* eslint-disable no-unused-vars */
+const Swiper = require("Swiper");
 const Components = require("./components/components");
 
 $(() => {
@@ -29,6 +31,12 @@ $(() => {
         }
     };
     Find.prototype.bindEvent = function () {
+        this.skip();
+    };
+    Find.prototype.initSwiper = function (result) {
+        console.log(result);
+    };
+    Find.prototype.skip = function () {
         //点击搜索跳转搜索Ajax.load
         $("#search").on("touchend", function() {
             let searchValue = $(".search_item").eq(0).find("span").html() || "";
@@ -37,7 +45,8 @@ $(() => {
     };
     const search = new Find({
         id: "find",
-        hasDel: false
+        hasDel: false,
+        hasSwiper: true
     });
     search.init();
 });

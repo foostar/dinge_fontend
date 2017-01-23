@@ -72,7 +72,7 @@ $(() => {
                     $("#searchMovie_movie").html("");
                     let data = res.data.list;   
                     data.forEach((v) => {
-                        let monent = v.releasetime.substr(0, 10);
+                        let monent = v.releaseTime.substr(0, 10);
                         let directors = "";
                         v.directors.forEach((d) => {
                             directors += `<em class='font-normal'>${d.name}</em>`;

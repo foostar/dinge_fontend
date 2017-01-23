@@ -6,6 +6,7 @@ const Events = require("../lib/events.js");
 function Components(opt) {
     this.ele = $("#"+opt.id);
     this.hasEvent = opt.hasEvent || false;
+    this.hasSwiper = opt.hasSwiper;
 }
 Components.prototype = {
     init() {
@@ -23,6 +24,7 @@ Components.prototype = {
         this.fetchData()
         .then((result) => {
             this.makeData(result);
+            this.hasSwiper && this.initSwiper(result);
         },(err) => {
             if(err.errcode && (err.errcode == 100401 || err.errcode == 100402)) {
                 dingeTools.removeStorage("userinfo");
