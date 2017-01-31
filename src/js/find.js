@@ -16,6 +16,9 @@ $(() => {
         this.skipEvent();
     };
     Find.prototype.getTemplate = function (item) {
+        if (!item) {
+            return null;
+        }
         return "<div class='search_item'><a href='moviedetails.html?id="+item._id+"'><img src="+item.images.large+" alt=''><span class='font-h'>"+item.title+"</span></a></div>";
     };
     Find.prototype.fetchData = function () {
