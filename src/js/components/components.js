@@ -24,7 +24,6 @@ Components.prototype = {
         this.fetchData()
         .then((result) => {
             this.makeData(result);
-            this.hasSwiper && this.initSwiper(result);
         },(err) => {
             if(err.errcode && (err.errcode == 100401 || err.errcode == 100402)) {
                 dingeTools.removeStorage("userinfo");

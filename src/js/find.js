@@ -1,15 +1,15 @@
 const $ = require("Zepto");
 const dingeTools = require("dingeTools");
-/* eslint-disable no-unused-vars */
-const Swiper = require("Swiper");
-const Components = require("./components/components");
+const Scrolladdcomponents = require("./components/scrolladdcomponents");
 
 $(() => {
     function Find(opt){ 
-        Components.call(this, opt);
+        Scrolladdcomponents.call(this, opt);
         this.page = 1;
+        this.holdPosition = 0;
+        this.mySwiper = "";
     }
-    Find.prototype = Object.create(Components.prototype);
+    Find.prototype = Object.create(Scrolladdcomponents.prototype);
     Find.constructor = Find;
     Find.prototype.getTemplate = function (item) {
         return "<div class='search_item'><a href='moviedetails.html?id="+item._id+"'><img src="+item.images.large+" alt=''><span class='font-h'>"+item.title+"</span></a></div>";
@@ -33,9 +33,6 @@ $(() => {
     Find.prototype.bindEvent = function () {
         this.skip();
     };
-    Find.prototype.initSwiper = function (result) {
-        console.log(result);
-    };
     Find.prototype.skip = function () {
         //点击搜索跳转搜索Ajax.load
         $("#search").on("touchend", function() {
@@ -45,8 +42,7 @@ $(() => {
     };
     const search = new Find({
         id: "find",
-        hasDel: false,
-        hasSwiper: true
+        hasDel: false
     });
     search.init();
 });
