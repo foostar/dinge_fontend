@@ -36,8 +36,8 @@ $(() => {
                                     </div>\
                                 </div>";
                     });
+                    $(html).appendTo($(".swiper-wrapper"));
                 }
-                $(html).appendTo($(".swiper-wrapper"));
                 resolve();
             }, (err) => {
                 reject(err);
