@@ -28,7 +28,13 @@ $(() => {
                 if(result.status == 1 &&  result.data.list.length>0) {
                     let data = result.data.list;
                     data.forEach((item) => {
-                        html += "<div class='swiper-slide'><div class='search_item'><a href='moviedetails.html?id="+item._id+"'><img src="+item.images.large+" alt=''><span class='font-h'>"+item.title+"</span></a></div></div>";
+                        html += "<div class='swiper-slide'>\
+                                    <div class='search_item'>\
+                                        <a href='moviedetails.html?id="+item._id+"'>\
+                                            <img src="+item.images.large+" alt=''><span class='font-h'>"+item.title+"</span>\
+                                        </a>\
+                                    </div>\
+                                </div>";
                     });
                 }
                 $(html).appendTo($(".swiper-wrapper"));
