@@ -56,12 +56,13 @@ const Swiper = require("Swiper");
             });
         },
         loadColletList(page){
-            const id=  dingeTools.getURLParam("id");
-            return dingeTools.commentByMovie({
-                token:Cookie.get("dinge"),
-                page:page,
-                id:id
-            });
+            console.log(page);
+            // const id=  dingeTools.getURLParam("id");
+            // return dingeTools.commentByMovie({
+            //     token:Cookie.get("dinge"),
+            //     page:page,
+            //     id:id
+            // });
         },
         moviedetailsTop(){   //TODO 加载头部部分
             //debugger

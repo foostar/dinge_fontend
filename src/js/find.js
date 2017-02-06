@@ -1,41 +1,58 @@
 const $ = require("Zepto");
 const dingeTools = require("dingeTools");
-const Components = require("./components/components");
+const Scrolladdcomponents = require("./components/scrolladdcomponents");
 
 $(() => {
     function Find(opt){ 
-        Components.call(this, opt);
-        this.page = 1;
+        Scrolladdcomponents.call(this, opt);
+        this.holdPosition = 0;
+        this.mySwiper = "";
     }
-    Find.prototype = Object.create(Components.prototype);
+    Find.prototype = Object.create(Scrolladdcomponents.prototype);
     Find.constructor = Find;
-    Find.prototype.getTemplate = function (item) {
-        return "<div class='search_item'><a href='moviedetails.html?id="+item._id+"'><img src="+item.images.large+" alt=''><span class='font-h'>"+item.title+"</span></a></div>";
+    Find.prototype.render = function(){
+        this.skipEvent();
+        this.getTemplate();
     };
-    Find.prototype.fetchData = function () {
+    Find.prototype.nextPage = function() {
+        this.page++;
         return dingeTools.movie({
             page: this.page
         });
     };
-    Find.prototype.makeData = function(result) {
-        const { getTemplate } = this;
-        let html = "";
-        if(result.status == 1 &&  result.data.list.length>0) {
-            let data = result.data.list;
-            data.forEach((item) => {
-                html += "<div class='swiper-slide'>"+getTemplate(item)+"</div>";
+    Find.prototype.getTemplate = function () {
+        return new Promise((resolve, reject) => {
+            this.nextPage()
+            .then((result) => {
+                let html = "";
+                if(result.status == 1 &&  result.data.list.length>0) {
+                    let data = result.data.list;
+                    data.forEach((item) => {
+                        html += "<div class='swiper-slide'>\
+                                    <div class='search_item'>\
+                                        <a href='moviedetails.html?id="+item._id+"'>\
+                                            <img src="+item.images.large+" alt=''><span class='font-h'>"+item.title+"</span>\
+                                        </a>\
+                                    </div>\
+                                </div>";
+                    });
+                    $(html).appendTo($(".swiper-wrapper"));
+                }
+                resolve();
+            }, (err) => {
+                reject(err);
             });
-            $(html).appendTo($(".swiper-wrapper"));
-        }
+        });
+        
     };
-    Find.prototype.bindEvent = function () {
-        //点击搜索跳转搜索Ajax.load
+    Find.prototype.skipEvent = function () {
         $("#search").on("touchend", function() {
-            window.location.href = `search.html?name=${encodeURIComponent($(".search_item").eq(0).find("span").html())}`;
+            let searchValue = $(".search_item").eq(0).find("span").html() || "";
+            window.location.href = `search.html?name=${encodeURIComponent(searchValue)}`;
         });
     };
     const search = new Find({
-        id: "find",
+        id: "find_scroll",
         hasDel: false
     });
     search.init();
