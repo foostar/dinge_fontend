@@ -6,20 +6,20 @@ $(() => {
     searchMovie page tab 切换
     */
     function SearchMovie(){
+        this.active = "movie";
         this.init();
     }
     SearchMovie.prototype ={
-        active:"movie",
-        init(){
+        init () {
             dingeTools.init();
             this.render();
             this.bindEvent();
         },
-        render(){
+        render () {
             $(".search_mov").val(decodeURIComponent(dingeTools.getURLParam("name")));
             this.renderModule();
         },
-        renderModule() {
+        renderModule () {
             if (this.active == "movie") {
                 this.movieModule();
             } else if(this.active == "comment") {
@@ -28,7 +28,7 @@ $(() => {
                 this.userModule(); 
             }
         },
-        search(){
+        search () {
             $(".search i").click(() => {
                 $("form").submit();
             });
@@ -42,12 +42,12 @@ $(() => {
                 });
             });
         },
-        bindEvent(){
+        bindEvent () {
             this.search();
             this.cancel();
             this.tab();
         },
-        formatSearch() {
+        formatSearch () {
             return new Promise((reslove, reject) => {
                 if (!$(".search_mov").val()) {
                     return reject({ msg: "搜索项不能为空！" });
@@ -61,7 +61,7 @@ $(() => {
                 reslove();
             });
         },
-        movieModule(){
+        movieModule () {
             //电影模块
             dingeTools.search({
                 movieName:$(".search_mov").val()
@@ -83,7 +83,7 @@ $(() => {
                 }
             });
         },
-        reviewModule(){
+        reviewModule () {
             //影评模块
             dingeTools.search({
                 commentTitle:$(".search_mov").val()
@@ -105,7 +105,7 @@ $(() => {
                 }
             });
         },
-        userModule(){
+        userModule () {
             dingeTools.search({
                 userName:$(".search_mov").val()
             })
@@ -113,41 +113,37 @@ $(() => {
                 $("#searchMovie_movie").html("");
                 let html = "";
                 if(res.status == 1){
-                    let data = res.data.list;           
+                    let data = res.data.list;   
                     for(let i=0;i<data.length;i++){
-                        html += "<ul class='movie_user' data-id="+data[ i ]._id+">"
-                                    +"<li class='user_img'><a href='javascript:;'><img src="+data[ i ].avatar+" alt=''></a></li>"
-                                    +"<li class='user_txt font-h'>"+data[ i ].nickname+"</li>"        
+                        let item = data[ i ];
+                        let commentFromItem = item.commentFrom;
+                        html += "<ul class='movie_user' data-id="+item._id+">"
+                                    +"<li class='user_img'><a href='javascript:;'><img src="+commentFromItem.avatar+" alt=''></a></li>"
+                                    +"<li class='user_txt font-h'>"+commentFromItem.nickname+"</li>"        
                                 +"</ul>";
                     }
                     $(html).appendTo($("#searchMovie_user"));
                 }
             });
         },
-        tab(){
+        tab () {
             //选项卡点击事件
-            $("#tag li").click((event) => {
-                $("#tag li").eq($(event.target).index()).addClass("current").siblings().removeClass("current");
-                $(".tagClass").hide().eq($(event.target).index()).show();
-                switch($(event.target).index()) {
-                    case 0:
-                        this.active = "movie";
-                        break;
-                    case 1:
-                        this.active = "comment";
-                        break;
-                    default:
-                        this.active = "user";
-                }
+            $("#tag").on("touchend", (e)=> {
+                let currentElem = e.target;
+                let index = $(currentElem).index();
+                let active = index === 0 ? "movie" : index ===1 ? "comment" : "user";
+                $("#tag li").eq(index).addClass("current").siblings().removeClass("current");
+                $(".tagClass").hide().eq(index).show();
+                this.active = active;
                 this.formatSearch()
                 .then(() => {
-                    this.reviewModule();
+                    this.renderModule();
                 }, err => {
                     console.log(err);
                 });
             });
         },
-        cancel(){
+        cancel () {
             //点击取消触发事件
             $("#search_cancel").click(() => {
                 window.location.href="find.html";

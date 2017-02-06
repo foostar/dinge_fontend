@@ -125,7 +125,8 @@
             console.log(directors)
             $.ajax({
               type: "post",
-              url: "http://dinge.v2.yoo.yunpro.cn/Api/movie/addMovie",
+              // url: "http://dinge.v2.yoo.yunpro.cn/Api/movie/addMovie",
+              url: "http://localhost:8686/Api/movie/addMovie",
               data: {
                 title:data.title,
                 rating:{
