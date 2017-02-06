@@ -6,7 +6,6 @@ const Events = require("../lib/events.js");
 function Components(opt) {
     this.ele = $("#"+opt.id);
     this.hasEvent = opt.hasEvent || false;
-    this.hasSwiper = opt.hasSwiper;
 }
 Components.prototype = {
     init() {
