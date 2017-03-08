@@ -1,26 +1,23 @@
-const dingeTools = require("dingeTools");
-const Listcomponents = require("./components/listcomponents");
+import { api } from "dingeTools";
+import Listcomponents from "./components/listcomponents";
 
-function MessagesFans(opt){
-    Listcomponents.call(this, opt);
-}
-MessagesFans.prototype = Object.create(Listcomponents.prototype);
-MessagesFans.constructor = MessagesFans;
+class MessagesFans extends Listcomponents {
+    constructor(opt) {
+        super(opt);
+    }
+    fetchData(page) {
+        return api.userLikeMe({
+            page
+        });
+    }
+    getTemplate(item) {
+        return "<div class='fans'><span>"+item.nickname+"</span>成为了你的粉丝</div>";
+    }
+} 
 
-MessagesFans.prototype.fetchData = function (page) {
-    return dingeTools.userLikeMe({
-        page:page
-    });
-};
-
-MessagesFans.prototype.getTemplate = function (item) {
-    return "<div class='fans'><span>"+item.nickname+"</span>成为了你的粉丝</div>";
-};
-
-var messagesFans = new MessagesFans({
+const fans = new MessagesFans({
     id: "message_like",
     hasNext: false,
     hasDel: false
 });
-
-messagesFans.init();
+fans.init();

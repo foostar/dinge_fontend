@@ -37,7 +37,8 @@ module.exports = {
                 include: srcDir + "/js",
                 loader: 'babel-loader',
                 query: {
-                  presets: ['es2015']
+                  presets: ['stage-0', 'es2015'],
+                  plugins: ['transform-runtime']
                 }
             },
             {
@@ -52,7 +53,8 @@ module.exports = {
             dingeUi: srcDir + "/js/ui/uiComponent.js",
             Swiper: srcDir + "/js/lib/swiper.jquery.min.js",
             dingeTools: srcDir + "/js/core/dingeTools.js",
-            API: srcDir + "/js/api/api.js"
+            API: srcDir + "/js/api/api.js",
+            utils: srcDir + "/js/utils/util.js"
         }
     },
     plugins: [

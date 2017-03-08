@@ -1,9 +1,6 @@
-const $ = require("Zepto");
-const dingeTools = require("dingeTools");
-$(() => {
-    dingeTools.init(); 
-    dingeTools.loadingFooter2();
-    $(".goback").on("touchend", () => {
-        window.history.back();
-    });
+import { dingeTools } from "dingeTools";
+dingeTools.init(); 
+dingeTools.loadingFooter2();
+document.querySelector(".goback").addEventListener("touchend", () => {
+    window.history.back();
 });

@@ -66,7 +66,7 @@ gulp.task('lessmin', function (done) {
 //将js加上10位md5,并修改html中的引用路径，该动作依赖build-js
 gulp.task('md5:js', ['build-js'], function (done) {
     gulp.src('dist/js/*.js')
-        .pipe(md5(10, 'dist/app/*.html'))
+        .pipe(md5(10, 'dist/views/*.html'))
         .pipe(gulp.dest('dist/js'))
         .on('end', done);
 });
@@ -155,7 +155,7 @@ gulp.task("build-js", ['fileinclude'], function(callback) {
 });
 
 // //发布
-gulp.task('default', ['copy:images', 'copy:data', 'lessmin', 'fileinclude', 'build-js', 'md5:css', "md5:js" ]);
+gulp.task('default', ['clean', 'copy:font', 'copy:images', 'lessmin', 'fileinclude', 'build-js', 'md5:css', "md5:js" ]);
 
 //开发
 gulp.task('dev', ['connect', 'copy:images', 'copy:font', 'copy:data', 'copy:config', 'lessmin', 'fileinclude', 'open', 'watch', 'build-js' ]);

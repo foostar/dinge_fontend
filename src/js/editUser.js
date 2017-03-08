@@ -2,42 +2,25 @@
  * Created by xiusiteng on 2016-08-12.
  * @desc 编辑用户资料
  */
-const $ = require("Zepto");
-const dingeUI = require("dingeUi");
-const dingeTools = require("dingeTools");
-const Cookie = require("js-cookie");
-const config = require("./config/config");
+import $ from "Zepto";
+import dingeUI from "dingeUi";
+import { api } from "dingeTools";
+import { provsData, citysData, distsData } from "./lib/cityData.js";
+import Components from "./components/components";
 
-const { provsData, citysData, distsData } = require("./lib/cityData.js");
-const Components = require("./components/components");
-
-$(() => {
-    function EditUser(opt){
-        Components.call(this,opt);
+class EditUser extends Components {
+    constructor(opt) {
+        super(opt);
     }
-    EditUser.prototype = Object.create(Components.prototype);
-    EditUser.prototype.constructor = EditUser;
-    EditUser.prototype.bindEvent = function(){
+    bindEvent() {
         // 提交用户资料
         this.submitUserData();
         // 性别选择弹出层
         this.alertSexChoice();
         // 选择性别
         this.choiceSex();
-        // 上传图片
-        this.uploadCarouse();
-    };
-    EditUser.prototype.uploadCarouse = function(){
-        new dingeUI.LUploader(document.getElementById("carouse"), {
-            url: `${config.url}/carouse/api/addCarouse`,//post请求地址
-            multiple: false,//是否一次上传多个文件 默认false
-            maxsize: 102400,//忽略压缩操作的文件体积上限 默认100kb
-            accept: "image/*",//可上传的图片类型
-            quality: 0.1,//压缩比 默认0.1  范围0.1-1.0 越小压缩率越大
-            showsize:false//是否显示原始文件大小 默认false
-        });
-    };
-    EditUser.prototype.choiceSex = function(){
+    }
+    choiceSex() {
         $(".edit_modal a").on("touchend", (event) => {
             $(".edit_content_sex").html($(event.target).html());
             $(".edit_mask").addClass("edit_mask_out");
@@ -46,16 +29,16 @@ $(() => {
                 $(".edit_mask").hide();
             },100);
         });
-    };
-    EditUser.prototype.alertSexChoice = function(){
+    }
+    alertSexChoice() {
         this.ele.on("touchend",".edit_content_sex", () => {
             $(".edit_mask").show();
             setTimeout(() => {
                 $(".edit_mask").addClass("edit_mask_in");
             },0);
         });
-    };
-    EditUser.prototype.submitUserData = function(){
+    }
+    submitUserData() {
         $(".goback").on("touchend", (event) => {
             event.preventDefault();
             if($("#sign").val().length > 30){
@@ -73,9 +56,9 @@ $(() => {
             // 修改数据
             this.editUserInfo(data);
         });
-    };
-    EditUser.prototype.editUserInfo = function(data){
-        dingeTools.editUserInfo(data)
+    }
+    editUserInfo(data) {
+        api.editUserInfo(data)
         .then((result) => {
             if(result.status == 1){
                 window.history.back();
@@ -85,24 +68,24 @@ $(() => {
                 window.location.href = "/views/login.html";
             }
         });
-    };
-    EditUser.prototype.render = function(){
+    }
+    render() {
         this.showUserData();
-    };
-    EditUser.prototype.showUserData = function(){
+    }
+    showUserData() {
         // 加载数据
         this.loadUserData()
         // 展示数据
         .then((result) => {
             this.makeData(result);
         });
-    };
-    EditUser.prototype.loadUserData = function(){
-        return dingeTools.userInfo({}, -1);
-    };
-    EditUser.prototype.makeData = function(result){
+    }
+    loadUserData() {
+        return api.userInfo({}, -1);
+    }
+    makeData(result) {
         if(result.status == 1){
-            // 给当前页面赋值
+        // 给当前页面赋值
             const data = result.data;
             $(".edit_carouse").attr("data-src",data.avatar);
             $(".edit_carouse img").attr("src",data.avatar);
@@ -114,7 +97,6 @@ $(() => {
             let birthday = new Date(data.birthday);
             birthday = birthday.getFullYear() + "-" + (birthday.getMonth() + 1) + "-" + birthday.getDate();
             $("#birthday").val(birthday);
-            $("#carouse").attr("data-user-id",Cookie.get("dinge"));
             const sign = document.getElementById("sign");
             // 创建日历插件
             const calendar = new dingeUI.LCalendar();
@@ -142,7 +124,7 @@ $(() => {
                 $(".word_count span").html(sign.value.length);
             };
         }
-    };
-    const edituser = new EditUser({id:"edituser"});
-    edituser.init();
-});
+    }
+}
+const edituser = new EditUser({id:"edituser"});
+edituser.init();

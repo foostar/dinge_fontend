@@ -1,23 +1,21 @@
-const $ = require("Zepto");
-const Swiper = require("Swiper");
-const dingeTools = require("dingeTools");
-const Scrolladdcomponents = require("./components/scrolladdcomponents");
+import $ from "Zepto";
+import Swiper from "Swiper";
+import { api } from "dingeTools";
+import Scrolladdcomponents from "./components/scrolladdcomponents";
+import { fromNow } from "utils";
 
-$(() => {
-    function Home(opt){
-        Scrolladdcomponents.call(this,opt);
+class Home extends Scrolladdcomponents {
+    constructor(opt) {
+        super(opt);
     }
-    Home.prototype = Object.create(Scrolladdcomponents.prototype);
-    Home.prototype.constructor = Home;
-    //渲染页面
-    Home.prototype.render = function(){
+    render() {
         this.loadingBanner();
         this.getTemplate();
-    };
-    Home.prototype.loadingBanner = function(){
+    }
+    loadingBanner() {
         //轮播图部分
         return new Promise((resolve, reject) => {
-            dingeTools.banner({})
+            api.banner({})
             .then((result) => {
                 var html = "";
                 if(result.status == 1 && result.data.length>0){
@@ -41,16 +39,16 @@ $(() => {
                 reject(err);
             });
         });
-    };
-    Home.prototype.nextPage = function() {
+    }
+    nextPage() {
         this.page++;
-        return dingeTools.comments({
+        return api.comments({
             page: this.page,
             pageSize: this.pageSize,
             rights: 90
         });
-    };
-    Home.prototype.getTemplate = function(){
+    }
+    getTemplate() {
         return new Promise((resolve, reject) => {
             this.nextPage()
             .then((res) => {
@@ -65,7 +63,7 @@ $(() => {
                                 +"<img class='home_comment_img flex-normal' src='"+item.movie.images.large+"' alt=''>"
                                 +"<div class='home_comment flex-normal'>"
                                     +"<div class='home_comment_author font-normal'>"
-                                        +"<em>"+dingeTools.fromNow(item.createdAt)+"</em>"
+                                        +"<em>"+fromNow(item.createdAt)+"</em>"
                                         +"<a href='other_means.html'><span style='background-image:url(../.."+item.commentFrom.avatar+");'>"+item.commentFrom.nickname+"</span></a>"
                                     +"</div>"
                                     +"<div class='home_comment_title'>"+item.content+"</div>"
@@ -83,7 +81,9 @@ $(() => {
                 reject(err);
             });
         });
-    };
-    const home = new Home();
-    home.init();
+    }
+}
+const home = new Home({
+    id: "home"
 });
+home.init();
