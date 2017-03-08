@@ -1,26 +1,24 @@
-const $ = require("Zepto");
-const dingeTools = require("dingeTools");
-const Scrolladdcomponents = require("./components/scrolladdcomponents");
+import $ from "Zepto";
+import { api } from "dingeTools";
+import Scrolladdcomponents from "./components/scrolladdcomponents";
 
-$(() => {
-    function Find(opt){ 
-        Scrolladdcomponents.call(this, opt);
+class Find extends Scrolladdcomponents {
+    constructor(opt) {
+        super(opt);
         this.holdPosition = 0;
         this.mySwiper = "";
     }
-    Find.prototype = Object.create(Scrolladdcomponents.prototype);
-    Find.constructor = Find;
-    Find.prototype.render = function(){
+    render() {
         this.skipEvent();
         this.getTemplate();
-    };
-    Find.prototype.nextPage = function() {
+    }
+    nextPage() {
         this.page++;
-        return dingeTools.movie({
+        return api.movie({
             page: this.page
         });
-    };
-    Find.prototype.getTemplate = function () {
+    }
+    getTemplate() {
         return new Promise((resolve, reject) => {
             this.nextPage()
             .then((result) => {
@@ -43,17 +41,16 @@ $(() => {
                 reject(err);
             });
         });
-        
-    };
-    Find.prototype.skipEvent = function () {
+    }
+    skipEvent() {
         $("#search").on("touchend", function() {
             let searchValue = $(".search_item").eq(0).find("span").html() || "";
             window.location.href = `search.html?name=${encodeURIComponent(searchValue)}`;
         });
-    };
-    const search = new Find({
-        id: "find_scroll",
-        hasDel: false
-    });
-    search.init();
+    }
+}
+const search = new Find({
+    id: "find_scroll",
+    hasDel: false
 });
+search.init();

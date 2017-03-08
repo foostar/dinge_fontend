@@ -1,37 +1,36 @@
-const $ = require("Zepto");
-const dingeTools = require("dingeTools");
-const Events = require("../lib/events.js");
+import $ from "Zepto";
+import { dingeTools } from "dingeTools";
+import Events from "../lib/events.js";
 
-
-function Components(opt) {
-    this.ele = $("#"+opt.id);
-    this.hasEvent = opt.hasEvent || false;
-}
-Components.prototype = {
+const { init } = dingeTools;
+class Components{
+    constructor(opt) {
+        this.ele = $("#"+opt.id);
+        this.hasEvent = opt.hasEvent || false;
+    }
     init() {
-        dingeTools.init();
-        this.bindEvent();
+        init();
         this.render();
+        this.bindEvent();
         if (this.hasEvent) {
             this.attachEvent();
         }
-    },
+    }
     render() {
         this.showData();
-    },
+    }
     showData() {
         this.fetchData()
-        .then((result) => {
+        .then(result => {
             this.makeData(result);
-        },(err) => {
+        })
+        .catch((err) => {
             if(err.errcode && (err.errcode == 100401 || err.errcode == 100402)) {
-                dingeTools.removeStorage("userinfo");
                 return window.location.href = "/views/login.html";
             }
         });
     }
-};
+}
 Events.mixTo(Components);
-Components.constructor = Components;
 
-module.exports = Components;
+export default Components;

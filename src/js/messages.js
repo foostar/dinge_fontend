@@ -1,2 +1,2 @@
-const dingeTools = require("dingeTools");
+import { dingeTools } from "dingeTools";
 dingeTools.init();

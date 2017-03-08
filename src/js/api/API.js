@@ -3,640 +3,589 @@
  *       #Author   xiusiteng
  *       #createAt   2016-11-18
  *       #question   使用fetch  
- *   适应方式：  1.改写api方法  2.改写storage 
+ *   适应方式：  1.改写fetch方法  2.改写store
  */
-var $ = require("Zepto");
-var Cookie = require("js-cookie");
+import "isomorphic-fetch";
+import Cookie from "js-cookie";
+import Cache from "../lib/cache/index.js";
 
-function Api (opt) {
-    this.env = opt.env;
-    this.URL = opt.url;
-    this.requestNum = 0;
-    this.cacheTime = opt.cacheTime || 0;
-    this.showLoading =  opt.showLoading || function(){};
-    this.closeLoading = opt.closeLoading || function(){};
-}
-Api.prototype = {
-    constructor: Api,
-    /*
-     * 请求函数
-     */
-    api: function (opt, storage, controls) {
-        var self = this;
-        return new Promise((reslove, reject) => {
-            $.ajax({
-                url: opt.url || "",
-                data: opt.data || {},
-                type: opt.method || "GET",
-                datatype: "json",
-                beforeSend: function(data) {
-                    if (opt.isAuth) {
-                        if(!Cookie.get("dinge")) {
-                            return reject({ errcode:100401, msg: "token为必传的参数，或token过期" });
-                        }
-                        data.setRequestHeader("authentication", Cookie.get("dinge"));
-                    }
-                    self.requestNum++;
-                    self.showLoading();
-                },
-                success: function (data) {
-                    reslove(data);
-                },
-                error: function(data) {
-                    let responseJSON;
-                    try {
-                        responseJSON = JSON.parse(data.response);
-                    } catch(e) {
-                        responseJSON = data.response;
-                    }
-                    reject(responseJSON);
-                },
-                complete: function(data) {
-                    let responseJSON;
-                    try {
-                        responseJSON = JSON.parse(data.response);
-                    } catch(e) {
-                        responseJSON = data.response;
-                    }
-                    let toSave = true;
-                    if (!storage) {
-                        toSave = false;
-                    }
-                    if(responseJSON.status == 1 && toSave) {
-                        var value;
-                        var local = JSON.parse(self.getStorage(storage));
-                        if(!controls) { 
-                            value = responseJSON.data;
-                            if(Object.prototype.toString.call(value) == "[object Object]") {
-                                value = JSON.stringify(Object.assign({}, value, { timeStamp: Date.now() }));
-                            } else {
-                                value = JSON.stringify(Object.assign({}, { 
-                                    timeStamp: Date.now(),
-                                    mes: value
-                                }));
-                            }
-                        }
-                        if(controls && controls.replace == true) {
-                            value = Object.assign({}, JSON.parse(self.getStorage(storage)), opt.data, {
-                                timeStamp: Date.now()
-                            });
-                            if (value.token) {
-                                delete value.token;
-                            }
-                            value = JSON.stringify(value);
-                        }
-                        if (controls && controls.delete) {
-                            if (opt.data.page == 1) {
-                                local.list = local.list.filter(function(v){
-                                    return v[ controls.delete ] != opt.data.id;
-                                });
-                                local.list.push(responseJSON.data);
-                                value = JSON.stringify(local);
-                            } else {
-                                value = JSON.stringify(local);
-                            }
-                        }
-                        self.setStorage(storage, value);
-                    }
-                    self.requestNum--;
-                    if (self.requestNum == 0) {
-                        self.closeLoading();
-                    }
-                }
+export default class Api {
+    constructor(opt) {
+        this.env = opt.env;
+        this.URL = opt.url;
+        this.requestNum = 0;
+        this.cacheTime = opt.cacheTime || 0;
+        this.modal = opt.modal;
+    }
+    raw(args, up) {
+        return Object.keys(args)
+            .sort()
+            .reduce((a, b) => `${a}&${up ? b.toLowerCase() : b}=${args[ b ]}`, "")
+            .slice(1);
+    }
+    fetch(opt) {
+        const token = Cookie.get("dinge");
+        this.requestNum++;
+        const { url, body, query, method, params } = opt;
+        const fetchUrl = url.replace("\:\w+\/", (s) => {
+            if (params) {
+                return opt.params[ s.substring(0, s.length - 1) ];
+            }
+        }) + (query ? "?" + this.raw(query) : "");
+        // self.showLoading();
+        let options = {
+            headers: {
+                "Content-Type": "application/json",
+                "authentication": process.env.NODE_ENV == "test" ? "730e8a6cd52b21e02553b382e774f9bf8d278a0d" : (token || "")
+            }
+        };
+        if (method && method == "POST") {
+            options = Object.assign(options, {
+                method: "POST",
+                body: JSON.stringify(body || {})
             });
+        }
+        return fetch(fetchUrl, options)
+            .then((response) => {
+                return {response, json: response.json()};
+            }).then(({response, json}) => {
+                this.requestNum--;
+                if (this.requestNum == 0) {
+                    console.log(response);
+                    // self.closeLoading();
+                }
+                if(!response.ok) {
+                    return json.then((data) => {
+                        return Promise.reject(data);
+                    });
+                }
+                return json;
+            });
+    }
+    /*
+     * 登录
+     */
+    login(opt) {
+        const { email, password } = opt;
+        if (!opt || !email) throw new Error("email为必传的参数，或传入参数不合法");
+        if (!password) throw new Error("password为必传的参数，或传入参数不合法");
+        Cache.del("userinfo");
+        return this.fetch({
+            url: this.env == "test" ? `${this.URL}/data/signin.json` : `${this.URL}/Api/user/signin`,
+            method:this.env == "test" ? "get" : "POST",
+            body: opt
         });
-    },
+    }
     /*
-     * 设置缓存
+     * 注册
      */
-    setStorage: function (key, value) {
-        if(!key || !value) throw new Error("缺少必要的参数");
-        if(Object.prototype.toString.call(value) == "[object object]") {
-            value = JSON.stringify(value);
-        }
-        localStorage.setItem(key, value);
-    },
-    /*
-     * 读取缓存
-     */
-    getStorage: function (key) {
-        if(!key) throw new Error("缺少必要的参数");
-        return localStorage.getItem(key);
-    },
-    /*
-     * 删除缓存
-     */
-    removeStorage: function (key) {
-        if(!key) throw new Error("缺少必要的参数");
-        return localStorage.removeItem(key);
-    },
-    /*
-     * 判断缓存是否过期
-     */
-    isExpire: function (key, cache) {
-        var self = this;
-        var now = Date.now();
-        var tmpstorage = this.getStorage(key);
-        if (!tmpstorage) {
-            return false;
-        }
-        var storage = JSON.parse(tmpstorage);
-        if(cache == 0){
-            cache = 0;
-        } else {
-            cache = cache || self.cacheTime;
-        }
-        if(cache != 0 && storage && (cache == -1 || (now - storage.timeStamp) < cache * 60000 )){
-            return true;
-        }
-        this.removeStorage(key);
-    },
-    /*
-     * 推送缓存
-     */
-    cacheData: function (key) {
-        var storage = JSON.parse(this.getStorage(key));
-        return new Promise((resolve) => {
-            resolve({ status: 1 , data: storage });
+    register(opt) {
+        const { username, email, password } = opt;
+        if (!opt || !username) throw new Error("userName为必传的参数，或传入参数不合法");
+        if (!email) throw new Error("email为必传的参数，或传入参数不合法");
+        if (!password) throw new Error("password为必传的参数，或传入参数不合法");
+        Cache.del("userinfo");
+        return this.fetch({
+            url: this.env == "test" ? `${this.URL}/data/signup.json` : `${this.URL}/Api/user/signup`,
+            method:this.env == "test" ? "get" : "POST",
+            body: opt
         });
-    },
-    /*
-     * 获取我的信息
-     */
-    userInfo: function (opt, cache) {
-        var self = this;
-        var key = "userinfo";
-        if(this.isExpire(key, cache)) {
-            return self.cacheData(key);
-        }
-        return this.api({
-            url: self.env == "test" ? `${self.URL}/data/getUserInfo.json` : `${self.URL}/Api/user/getUserInfo`,
-            data: opt,
-            isAuth: true
-        }, key);
-    },
-    /*
-     * 获取用户信息
-     */
-    getUsers: function (opt, cache) {
-        var self = this;
-        if (!opt || !opt.userId) throw new Error("userId为必传的参数，或传入参数不合法");
-        var key = opt.userId + "userinfo";
-        if(this.isExpire(key, cache)) {
-            return self.cacheData(key);
-        }
-        return this.api({
-            url: self.env == "test" ? `${self.URL}/data/getUserInfo.json` : `${self.URL}/Api/user/userInfo`,
-            data: opt
-        }, key);
-    },
-    /*
-     * 编辑用户信息
-     */
-    editUserInfo: function (opt) {
-        var self = this;
-        var key = "userinfo";
-        if (!opt) throw new Error("参数不能为空，或传入参数不合法");
-        return this.api({
-            url: self.env == "test" ? `${self.URL}/data/editUserInfo.json` : `${self.URL}/Api/user/editUserInfo`,
-            method: self.env == "test" ? "GET" : "POST",
-            data: opt,
-            isAuth:true
-        }, key, {replace: true});
-    },
-    /*
-     * 浏览历史
-     */
-    historyList: function (opt, cache) {
-        var self = this;
-        var key = "history";
-        if (!opt || !opt.token) throw new Error("token为必传的参数，或传入参数不合法");
-        if(this.isExpire(key, cache)) {
-            return self.cacheData(key);
-        }
-        return this.api({
-            url: self.env == "test" ? `${self.URL}/data/history.json` : `${self.URL}/Api/user/getHistory`,
-            data: opt,
-            isAuth: true
-        }, key);
-    },
+    }
     /*
      * 获取banner图片
      */
-    banner: function (opt, cache) {
-        var self = this;
-        var key = "banner";
-        if(this.isExpire(key, cache)) {
-            return self.cacheData(key);
-        }
-        return this.api(Object.assign({}, opt, {
-            url: self.env == "test" ? `${self.URL}/data/getCarousels.json` : `${self.URL}/Api/common/getCarousels`
-        }), key);
-    },
+    banner(opt, options) {
+        options = options || {};
+        const storgeKey = "banner";
+        const fetch = () => this.fetch({
+            url: this.env == "test" ? `${this.URL}/data/getCarousels.json` : `${this.URL}/Api/common/getCarousels`
+        });
+        Cache.add(storgeKey, fetch, Object.assign({
+            expires: 30 * 60 * 1000,
+            sync   : 2,
+            force  : true
+        }, options));
+        return Cache.get(storgeKey);
+    }
     /*
-     * 获取首页的评论
+     * 搜索
      */
-    comments: function (opt, cache) {
-        var self = this;
-        var key;
-        if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
-        if (!opt.page) opt.page = 1;
-        if (opt.movieId){
-            key = opt.movieId + "comments";
-        } else if(opt.userId) {
-            key = opt.userId + "comment";
+    search(opt) {
+        let url = `${this.URL}/data/movieFindOne.json`;
+        if (this.env == "test") {
+            if (opt.commentTitle) {
+                url = `${this.URL}/data/commentsDetail.json`;
+            }
+            if (opt.userName) {
+                url = `${this.URL}/data/commentsDetail.json`;
+            }
         } else {
-            key = "homecomments";
+            url = `${this.URL}/Api/common/search`;
         }
-        if(this.isExpire(key, cache) && opt.page == 1) {
-            return self.cacheData(key);
-        }
-        return this.api({
-            url: self.env == "test" ? `${self.URL}/data/getCommentsByRight.json` : `${self.URL}/Api/comment/getComments`,
-            data: opt
-        }, key);
-    },
+        return this.fetch({
+            url,
+            query: opt
+        });
+    }
+    /*********** 用户方面  ***********/
     /*
-     * 获取聊天详情
+     * 我的信息
      */
-    dialogue: function (opt, cache) {
-        var self = this;
-        var key = opt.typeId;
-        if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
-        if (!opt || !opt.typeId) throw new Error("typeId为必传的参数，或传入参数不合法");
-        if (!opt || !opt.token) throw new Error("token为必传的参数，或传入参数不合法");
-        if(this.isExpire(key, cache) && opt.page == 1) {
-            return self.cacheData(key);
-        }
-        return this.api({
-            url: self.env == "test" ? `${self.URL}/data/getMessageDetail.json` : `${self.URL}/Api/message/getMessageDetail`,
-            data: opt,
-            isAuth: true
-        }, key);
-    },
+    userInfo(opt, options) {
+        options = options || {};
+        const storgeKey = "userinfo";
+        const fetch = () => this.fetch({
+            url: this.env == "test" ? `${this.URL}/data/getUserInfo.json` : `${this.URL}/Api/user/getUserInfo`
+        });
+        Cache.add(storgeKey, fetch, Object.assign({
+            expires: 3 * 24 * 60 * 60 * 1000,
+            sync   : 2,
+            force  : true
+        }, options));
+        return Cache.get(storgeKey);
+    }
     /*
-     * 发送聊天信息
+     * 获取其他用户信息
      */
-    sendMessage: function (opt) {
-        var self = this;
-        var key = opt.typeId;
-        if (!opt || !opt.to) throw new Error("page为必传的参数，或传入参数不合法");
-        if (!opt || !opt.content) throw new Error("typeId为必传的参数，或传入参数不合法");
-        if (!opt || !opt.token) throw new Error("token为必传的参数，或传入参数不合法");
-        return this.api({
-            url: self.env == "test" ? `${self.URL}/data/sendMessage.json` : `${self.URL}/Api/message/sendMessage`,
-            data: opt,
-            isAuth: true
-        }, key, { push: true });
-    },
+    getUser(opt, options) {
+        options = options || {};
+        if (!opt || !opt.userId) throw new Error("userId为必传的参数，或传入参数不合法");
+        const storgeKey = "userinfo" + opt.userId;
+        const fetch = () => this.fetch({
+            url: this.env == "test" ? `${this.URL}/data/getUserInfo.json` : `${this.URL}/Api/user/userInfo`,
+            query: opt
+        });
+        Cache.add(storgeKey, fetch, Object.assign({
+            expires: 5 * 60 * 1000,
+            sync   : 2,
+            force  : true
+        }, options));
+        return Cache.get(storgeKey);
+    }
     /*
-     * 获取聊天列表
+     * 获取用户信息
      */
-    messageList: function (opt, cache) {
-        var self = this;
-        var key = "messageList";
-        if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
-        if (!opt || !opt.token) throw new Error("token为必传的参数，或传入参数不合法");
-        if(this.isExpire(key, cache) && opt.page == 1) {
-            return self.cacheData(key);
-        }
-        return this.api({
-            url: self.env == "test" ? `${self.URL}/data/getMessageList.json` : `${self.URL}/Api/message/getMessageList`,
-            data: opt,
-            isAuth: true
-        }, key);
-    },
+    editUserInfo(opt) {
+        if (!opt) throw new Error("参数不能为空，或传入参数不合法");
+        Cache.del("userinfo");
+        return this.fetch({
+            url: this.env == "test" ? `${this.URL}/data/editUserInfo.json` : `${this.URL}/Api/user/editUserInfo`,
+            method:this.env == "test" ? "get" : "POST",
+            body: opt
+        });
+    }
     /*
-     * 删除聊天列表
+     * 浏览历史
      */
-    deleteMesList: function (opt) {
-        var self = this;
-        var key = "messageList";
-        if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
-        if (!opt || !opt.token) throw new Error("token为必传的参数，或传入参数不合法");
-        if (!opt || !opt.typeId) throw new Error("typeId为必传的参数，或传入参数不合法");
-        return this.api({
-            url: self.env == "test" ? `${self.URL}/data/deletemessageList.json` : `${self.URL}/Api/message/delMessageList`,
-            data: opt,
-            isAuth: true
-        }, key, { delete: "typeId" });
-    },
-    /*
-     * 对我的评论
-     */
-    commentToMe: function (opt, cache) {
-        var self = this;
-        var key = "commentToMe";
-        if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
-        if(this.isExpire(key, cache) && opt.page == 1) {
-            return self.cacheData(key);
-        }
-        return this.api({
-            url: self.env == "test" ? `${self.URL}/data/commentToMe.json` : `${self.URL}/Api/comment/commentsToMe`,
-            data: opt,
-            isAuth: true
-        }, key);
-    },
-    /*
-     * 喜欢我的评论
-     */
-    commentLikeMe: function (opt, cache) {
-        var self = this;
-        var key = "commentLikeMe";
-        if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
-        if(this.isExpire(key, cache) && opt.page == 1) {
-            return self.cacheData(key);
-        }
-        return this.api({
-            url: self.env == "test" ? `${self.URL}/data/commentsDetail.json` : `${self.URL}/Api/comment/zanList`,
-            data: opt,
-            isAuth: true
-        }, key);
-    },
+    historyList(opt, options) {
+        options = options || {};
+        const storgeKey = "history";
+        const fetch = () => this.fetch({
+            url: this.env == "test" ? `${this.URL}/data/history.json` : `${this.URL}/Api/user/getHistory`
+        });
+        Cache.add(storgeKey, fetch, Object.assign({
+            expires: 5 * 60 * 1000,
+            sync   : 2,
+            force  : true
+        }, options));
+        return Cache.get(storgeKey);
+    }
     /*
      * 喜欢我的人
      */
-    userLikeMe: function (opt, cache) {
-        var self = this;
-        var key = "userLikeMe";
-        if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
-        if(this.isExpire(key, cache) && opt.page == 1) {
-            return self.cacheData(key);
-        }
-        return this.api({
-            url: self.env == "test" ? `${self.URL}/data/commentsDetail.json` : `${self.URL}/Api/user/getUserFocusFromlist`,
-            data: opt,
-            isAuth: true
-        }, key);
-    },
-    /*
-     * 我的评论
-     */
-    myConmments: function(opt, cache) {
-        var self = this;
-        var key = "myConmments";
-        if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
-        if(this.isExpire(key, cache) && opt.page == 1) {
-            return self.cacheData(key);
-        }
-        return this.api({
-            url: self.env == "test" ? `${self.URL}/data/getMyConmment.json` : `${self.URL}/Api/comment/myComments`,
-            data: opt,
-            isAuth: true
-        }, key);
-    },
-    /*
-     * 删除我的评论
-     */
-    delMyConmments: function (opt) {
-        var self = this;
-        var key = "myConmments";
-        if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
-        if (!opt || !opt.token) throw new Error("token为必传的参数，或传入参数不合法");
-        return this.api({
-            url: self.env == "test" ? `${self.URL}/data/deleteMyConmment.json` : `${self.URL}/Api/message/delMyComments`,
-            data: opt,
-            isAuth: true
-        }, key, { delete: "_id" });
-    },
+    userLikeMe(opt, options) {
+        options = options || {};
+        const { page } = opt;
+        if (!opt || !page) throw new Error("page为必传的参数，或传入参数不合法");
+        const storgeKey = "userLikeMe";
+        const fetch = () => this.fetch({
+            url: this.env == "test" ? `${this.URL}/data/commentsDetail.json` : `${this.URL}/Api/user/getUserFocusFromlist`,
+            query: opt
+        });
+        if (page != 1) return fetch();
+        Cache.add(storgeKey, fetch, Object.assign({
+            expires: 5 * 60 * 1000,
+            sync   : 2,
+            force  : true
+        }, options));
+        return Cache.get(storgeKey);
+    }
     /*
      * 我关注的人
      */
-    myFocusList: function (opt, cache) {
-        var self = this;
-        var key = "myFocus";
-        if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
-        if(this.isExpire(key, cache) && opt.page == 1) {
-            return self.cacheData(key);
-        }
-        return this.api({
-            url: self.env == "test" ? `${self.URL}/data/getUserFocuslist.json` : `${self.URL}/Api/user/getUserFocuslist`,
-            data: opt,
-            isAuth: true
-        }, key);
-    },
+    myFocusList(opt, options) {
+        options = options || {};
+        const { page } = opt;
+        if (!opt || !page) throw new Error("page为必传的参数，或传入参数不合法");
+        const storgeKey = "myFocus";
+        const fetch = () => this.fetch({
+            url: this.env == "test" ? `${this.URL}/data/getUserFocuslist.json` : `${this.URL}/Api/user/getUserFocuslist`,
+            query: opt
+        });
+        if (page != 1) return fetch();
+        Cache.add(storgeKey, fetch, Object.assign({
+            expires: 5 * 60 * 1000,
+            sync   : 2,
+            force  : true
+        }, options));
+        return Cache.get(storgeKey);
+    }
     /*
      * 我的粉丝
      */
-    fansList: function (opt, cache) {
-        var self = this;
-        var key = "myFans";
-        if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
-        if(this.isExpire(key, cache) && opt.page == 1) {
-            return self.cacheData(key);
-        }
-        return this.api({
-            url: self.env == "test" ? `${self.URL}/data/getUserFocuslist.json` : `${self.URL}/Api/user/getUserFocusFromlist`,
-            data: opt,
-            isAuth: true
-        }, key);
-    },
-    /*
-     * 搜索电影
-     */
-    movie: function (opt, cache) {
-        var self = this;
-        var key;
-        if (opt.id) {
-            key = opt.id + "moviedetail";
-        } else {
-            key = "movieList";
-        }
-        if(this.isExpire(key, cache) && opt.page == 1) {
-            return self.cacheData(key);
-        }
-        return this.api({
-            url: self.env == "test" ? `${self.URL}/data/movieFindOne.json` : `${self.URL}/Api/movie/showMovieList`,
-            data: opt
-        }, key);
-    },
+    fansList(opt, options) {
+        options = options || {};
+        const { page } = opt;
+        if (!opt || !page) throw new Error("page为必传的参数，或传入参数不合法");
+        const storgeKey = "myFans";
+        const fetch = () => this.fetch({
+            url: this.env == "test" ? `${this.URL}/data/getUserFocuslist.json` : `${this.URL}/Api/user/getUserFocusFromlist`,
+            query: opt
+        });
+        if (page != 1) return fetch();
+        Cache.add(storgeKey, fetch, Object.assign({
+            expires: 5 * 60 * 1000,
+            sync   : 2,
+            force  : true
+        }, options));
+        return Cache.get(storgeKey);
+    }
     /*
      * 我的收藏
      */
-    getMyCollet: function (opt, cache) {
-        var self = this;
-        var key = "mycollet";
-        if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
-        if(this.isExpire(key, cache) && opt.page == 1) {
-            return self.cacheData(key);
-        }
-        return this.api({
-            url: self.env == "test" ? `${self.URL}/data/getMyCollet.json` : `${self.URL}/Api/comment/getMyCollet`,
-            data: opt,
-            isAuth: true
-        }, key);
-    },
+    getMyCollet(opt, options) {
+        options = options || {};
+        const { page } = opt;
+        if (!opt || !page) throw new Error("page为必传的参数，或传入参数不合法");
+        const storgeKey = "mycollet";
+        const fetch = () => this.fetch({
+            url: this.env == "test" ? `${this.URL}/data/getMyCollet.json` : `${this.URL}/Api/comment/getMyCollet`,
+            query: opt
+        });
+        if (page && page != 1) return fetch();
+        Cache.add(storgeKey, fetch, Object.assign({
+            expires: 30 * 60 * 1000,
+            sync   : 2,
+            force  : true
+        }, options));
+        return Cache.get(storgeKey);
+    }
     /*
      * 收藏
      */
-    collet: function (opt) {
-        var self = this;
-        var key = "mycollet";
+    collet(opt) {
         if (!opt || !opt.commentId) throw new Error("id为必传的参数，或传入参数不合法");
+        Cache.del("mycollet");
         opt = Object.assign({
             type: "collet",
             isList: false,
             page: 1
         }, opt);
-        return this.api({
-            url: self.env == "test" ? `${self.URL}/data/unCollet.json` : `${self.URL}/Api/comment/collet`,
-            type: self.env == "test" ? "GET" : "POST",
-            data: opt,
-            isAuth: true
-        }, key, opt.type == "collet" ? {} : { delete: "_id" });
-    },
+        return this.fetch({
+            url: this.env == "test" ? `${this.URL}/data/unCollet.json` : `${this.URL}/Api/comment/collet`,
+            body: opt,
+            method: "POST"
+        });
+    }
     /*
-     * 加关注
+     * 关注
      */
-    focus: function (opt) {
-        var self = this;
-        var key = "myFocus";
+    focus(opt) {
         if (!opt || !opt.userId) throw new Error("id为必传的参数，或传入参数不合法");
+        Cache.del("myFocus");
         opt = Object.assign({
             type: "focus",
             isList: false,
             page: 1
         }, opt);
-        return this.api({
-            url: self.env == "test" ? `${self.URL}/data/focusUser.json` : `${self.URL}/Api/user/FocusUser`,
-            type: self.env == "test" ? "GET" : "POST",
-            data: opt,
-            isAuth: true
-        }, key, opt.type == "focus" ? {} : { delete: "_id" });
-    },
-    /*
-     * 注册
-     */
-    register: function (opt) {
-        var self = this;
-        if (!opt || !opt.username) throw new Error("userName为必传的参数，或传入参数不合法");
-        if (!opt || !opt.email) throw new Error("email为必传的参数，或传入参数不合法");
-        if (!opt || !opt.password) throw new Error("password为必传的参数，或传入参数不合法");
-        return this.api({
-            url: self.env == "test" ? `${self.URL}/data/signup.json` : `${self.URL}/Api/user/signup`,
-            method:self.env == "test" ? "get" : "POST",
-            data: opt
+        return this.fetch({
+            url: this.env == "test" ? `${this.URL}/data/focusUser.json` : `${this.URL}/Api/user/FocusUser`,
+            body: opt,
+            method: "POST"
         });
-    },
-    /*
-     * 登录
-     */
-    login: function (opt) {
-        var self = this;
-        if (!opt || !opt.email) throw new Error("email为必传的参数，或传入参数不合法");
-        if (!opt || !opt.password) throw new Error("password为必传的参数，或传入参数不合法");
-        return this.api({
-            url: self.env == "test" ? `${self.URL}/data/signin.json` : `${self.URL}/Api/user/signin`,
-            method:self.env == "test" ? "get" : "POST",
-            data: opt
-        });
-    },
-    /*
-     * 搜索
-     */
-    search: function (opt) {
-        var self = this;
-        let url = `${self.URL}/data/movieFindOne.json`;
-        if (this.env == "test") {
-            if (opt.commentTitle) {
-                url = `${self.URL}/data/commentsDetail.json`;
-            }
-            if (opt.userName) {
-                url = `${self.URL}/data/commentsDetail.json`;
-            }
-        } else {
-            url = `${self.URL}/Api/common/search`;
-        }
-        return this.api({
-            url: url,
-            data: opt
-        });
-    },
-    /*
-     * 评论详情
-     */
-    commentsDetail: function (opt, cache) {
-        var self = this;
-        var key = `${opt.commentId}commentsDetail`;
-        if (!opt || !opt.commentId) throw new Error("commentId为必传的参数，或传入参数不合法");
-        if(this.isExpire(key, cache) && opt.page == 1) {
-            return self.cacheData(key);
-        }
-        return this.api({
-            url: self.env == "test" ? `${self.URL}/data/commentsDetail.json` : `${self.URL}/Api/comment/commentsDetail`,
-            data: opt
-        }, key);
-    },
-    /*
-     * 点赞
-     */
-    star: function (opt) {
-        var self = this;
-        if (!opt || !opt.commentId) throw new Error("commentId为必传的参数，或传入参数不合法");
-        var key = `${opt.commentId}commentsDetail`;
-        return this.api({
-            url: self.env == "test" ? `${self.URL}/data/unCollet.json` : `${self.URL}/Api/comment/addLike`,
-            data: opt,
-            isAuth: true
-        }, key);
-    },
-    /*
-     * 评论电影
-     */
-    comment: function (opt) {
-        var self = this;
-        if (!opt || !opt.title) throw new Error("title为必传的参数，或传入参数不合法");
-        if (!opt || !opt.content) throw new Error("content为必传的参数，或传入参数不合法");
-        if (!opt || !opt.movie) throw new Error("movie为必传的参数，或传入参数不合法");
-        if (!opt || !opt.rank) throw new Error("rank为必传的参数，或传入参数不合法");
-        var storge = [ "homecomments", opt.movie+"comments", "myConmments" ];
-        storge.forEach((v) => {
-            this.removeStorage(v);
-        });
-        return this.api({
-            url: self.env == "test" ? `${self.URL}/data/unCollet.json` : `${self.URL}/Api/comment/commentMovie`,
-            data: opt,
-            isAuth: true
-        });
-    },
-    /*
-     * 回复评论
-     */
-    reply: function (opt) {
-        var self = this;
-        if (!opt || !opt.commentTo) throw new Error("commentTo为必传的参数，或传入参数不合法");
-        if (!opt || !opt.commentFrom) throw new Error("commentFrom为必传的参数，或传入参数不合法");
-        if (!opt || !opt.commentId) throw new Error("commentId为必传的参数，或传入参数不合法");
-        if (!opt || !opt.content) throw new Error("content为必传的参数，或传入参数不合法");
-        return this.api({
-            url: self.env == "test" ? `${self.URL}/data/unCollet.json` : `${self.URL}/Api/comment/addComments`,
-            data: opt,
-            isAuth: true
-        });
-    },
+    }
     /*
      * 拉黑用户
      */
-    blacklist: function (opt) {
-        var self = this;
+    blacklist(opt) {
         if (!opt || !opt.userId) throw new Error("userId为必传的参数，或传入参数不合法");
-        return this.api({
-            url: self.env == "test" ? `${self.URL}/data/unCollet.json` : `${self.URL}/Api/user/blackList`,
-            data: opt,
-            isAuth: true
+        return this.fetch({
+            url: this.env == "test" ? `${this.URL}/data/unCollet.json` : `${this.URL}/Api/user/blackList`,
+            query: opt
         });
-    },
+    }
     /*
      * 举报用户
      */
-    reportUser: function (opt) {
-        var self = this;
+    reportUser(opt) {
         if (!opt || !opt.userId) throw new Error("userId为必传的参数，或传入参数不合法");
-        return this.api({
-            url: self.env == "test" ? `${self.URL}/data/unCollet.json` : `${self.URL}/Api/user/reportUser`,
-            data: opt,
-            isAuth: true
+        return this.fetch({
+            url: this.env == "test" ? `${this.URL}/data/unCollet.json` : `${this.URL}/Api/user/reportUser`,
+            query: opt
         });
     }
-};
-module.exports = Api;
+    /*********** 评论方面  **********/
+    /*
+     * 获取首页的评论
+     */
+    comments(opt, options) {
+        options = options || {};
+        if (!opt) throw new Error("page为必传的参数，或传入参数不合法");
+        const { page } = opt;
+        if (!page) opt.page = 1;
+        let storgeKey = null;
+        if (opt.movieId){
+            storgeKey = opt.movieId + "comments";
+        } else if(opt.userId) {
+            storgeKey = opt.userId + "comment";
+        } else {
+            storgeKey = "homecomments";
+        }
+        const fetch = () => this.fetch({
+            url: this.env == "test" ? `${this.URL}/data/getCommentsByRight.json` : `${this.URL}/Api/comment/getComments`,
+            query: opt
+        });
+        if (page != 1) return fetch();
+        Cache.add(storgeKey, fetch, Object.assign({
+            expires: 5 * 60 * 1000,
+            sync   : 1,
+            force  : true
+        }, options));
+        return Cache.get(storgeKey);
+    }
+    /*
+     * 我的评论
+     */
+    myComments(opt, options) {
+        options = options || {};
+        const { page } = opt;
+        if (!opt || !page) throw new Error("page为必传的参数，或传入参数不合法");
+        const storgeKey = "myComments";
+        const fetch = () => this.fetch({
+            url: this.env == "test" ? `${this.URL}/data/getMyConmment.json` : `${this.URL}/Api/comment/myComments`,
+            query: opt
+        });
+        if (page != 1) return fetch();
+        Cache.add(storgeKey, fetch, Object.assign({
+            expires: 5 * 60 * 1000,
+            sync   : 2,
+            force  : true
+        }, options));
+        return Cache.get(storgeKey);
+    }
+    /*
+     * 删除我的评论
+     */
+    delMyConmments(opt) {
+        if (!opt || !opt.page) throw new Error("page为必传的参数，或传入参数不合法");
+        Cache.del("myConmments");
+        return this.fetch({
+            url: this.env == "test" ? `${this.URL}/data/deleteMyConmment.json` : `${this.URL}/Api/comment/delMyComments`,
+            query: opt
+        });
+    }
+    /*
+     * 对我的评论
+     */
+    commentToMe(opt, options) {
+        options = options || {};
+        const { page } = opt;
+        if (!opt || !page) throw new Error("page为必传的参数，或传入参数不合法");
+        const storgeKey = "commentToMe";
+        const fetch = () => this.fetch({
+            url: this.env == "test" ? `${this.URL}/data/commentToMe.json` : `${this.URL}/Api/comment/commentsToMe`,
+            query: opt
+        });
+        if (page != 1) return fetch();
+        Cache.add(storgeKey, fetch, Object.assign({
+            expires: 5 * 60 * 1000,
+            sync   : 2,
+            force  : true
+        }, options));
+        return Cache.get(storgeKey);
+    }
+    /*
+     * 喜欢我的评论
+     */
+    commentLikeMe(opt, options) {
+        options = options || {};
+        const { page } = opt;
+        if (!opt || !page) throw new Error("page为必传的参数，或传入参数不合法");
+        const storgeKey = "commentLikeMe";
+        const fetch = () => this.fetch({
+            url: this.env == "test" ? `${this.URL}/data/commentsDetail.json` : `${this.URL}/Api/comment/zanList`,
+            query: opt
+        });
+        if (page != 1) return fetch();
+        Cache.add(storgeKey, fetch, Object.assign({
+            expires: 5 * 60 * 1000,
+            sync   : 2,
+            force  : true
+        }, options));
+        return Cache.get(storgeKey);
+    }
+    /*
+     * 评论详情
+     */
+    commentsDetail(opt, options) {
+        options = options || {};
+        const { commentId } = opt;
+        if (!opt || !commentId) throw new Error("commentId为必传的参数，或传入参数不合法");
+        const storgeKey = `${commentId}commentsDetail`;
+        const fetch = () => this.fetch({
+            url: this.env == "test" ? `${this.URL}/data/commentsDetail.json` : `${this.URL}/Api/comment/commentsDetail`,
+            query: opt
+        });
+        if (opt.page && opt.page != 1) return fetch();
+        Cache.add(storgeKey, fetch, Object.assign({
+            expires: 30 * 60 * 1000,
+            sync   : 2,
+            force  : true
+        }, options));
+        return Cache.get(storgeKey);
+    }
+    /*
+     * 点赞
+     */
+    star(opt) {
+        const { commentId } = opt;
+        if (!opt || !commentId) throw new Error("commentId为必传的参数，或传入参数不合法");
+        Cache.del(`${commentId}commentsDetail`);
+        return this.fetch({
+            url: this.env == "test" ? `${this.URL}/data/unCollet.json` : `${this.URL}/Api/comment/addLike`,
+            body: opt,
+            method: "POST"
+        });
+    }
+    /*
+     * 评论电影
+     */
+    comment(opt) {
+        const { title, content, movie, rank } = opt;
+        if (!opt || !title) throw new Error("title为必传的参数，或传入参数不合法");
+        if (!content) throw new Error("content为必传的参数，或传入参数不合法");
+        if (!movie) throw new Error("movie为必传的参数，或传入参数不合法");
+        if (!rank) throw new Error("rank为必传的参数，或传入参数不合法");
+        const storge = [ "homecomments", opt.movie+"comments", "myConmments" ];
+        Promise.all(storge.map((v) => Cache.del(v)));
+        return this.fetch({
+            url: this.env == "test" ? `${this.URL}/data/unCollet.json` : `${this.URL}/Api/comment/commentMovie`,
+            body: opt,
+            method: "POST"
+        });
+    }
+    /*
+     * 回复评论
+     */
+    reply(opt) {
+        const { commentTo, commentId, content } = opt;
+        if (!opt || !commentTo) throw new Error("commentTo为必传的参数，或传入参数不合法");
+        if (!commentId) throw new Error("commentId为必传的参数，或传入参数不合法");
+        if (!content) throw new Error("content为必传的参数，或传入参数不合法");
+        Cache.del(`${commentId}commentsDetail`);
+        return this.fetch({
+            url: this.env == "test" ? `${this.URL}/data/unCollet.json` : `${this.URL}/Api/comment/addComments`,
+            body: opt,
+            method: "POST"
+        });
+    }
+    /********* 聊天方面 *********/
+    /*
+     * 获取聊天详情
+     */
+    dialogue(opt, options) {
+        options = options || {};
+        const { page, typeId } = opt;
+        if (!opt || !page) throw new Error("page为必传的参数，或传入参数不合法");
+        if (!typeId) throw new Error("typeId为必传的参数，或传入参数不合法");
+        const storgeKey = "message" + opt.typeId;
+        const fetch = () => this.fetch({
+            url: this.env == "test" ? `${this.URL}/data/getMessageDetail.json` : `${this.URL}/Api/message/getMessageDetail`,
+            query: opt
+        });
+        if (page != 1) return fetch();
+        Cache.add(storgeKey, fetch, Object.assign({
+            expires: 5 * 60 * 1000,
+            sync   : 2,
+            force  : true
+        }, options));
+        return Cache.get(storgeKey);
+    }
+    /*
+     * 发送聊天信息
+     */
+    sendMessage(opt) {
+        const { to, content } = opt;
+        if (!opt || !to) throw new Error("page为必传的参数，或传入参数不合法");
+        if (!content) throw new Error("typeId为必传的参数，或传入参数不合法");
+        const storgeKey = "message" + opt.typeId;
+        Promise.all([ Cache.del("messageList"), Cache.del(storgeKey) ]);
+        return this.fetch({
+            url: this.env == "test" ? `${this.URL}/data/sendMessage.json` : `${this.URL}/Api/message/sendMessage`,
+            body: opt,
+            method: "POST"
+        });
+    }
+    /*
+     * 获取聊天列表
+     */
+    messageList(opt, options) {
+        options = options || {};
+        const { page } = opt;
+        if (!opt || !page) throw new Error("page为必传的参数，或传入参数不合法");
+        const storgeKey = "messageList";
+        const fetch = () => this.fetch({
+            url: this.env == "test" ? `${this.URL}/data/getMessageList.json` : `${this.URL}/Api/message/getMessageList`,
+            query: opt
+        });
+        if (page != 1) return fetch();
+        Cache.add(storgeKey, fetch, Object.assign({
+            expires: 5 * 60 * 1000,
+            sync   : 2,
+            force  : true
+        }, options));
+        return Cache.get(storgeKey);
+    }
+    /*
+     * 删除聊天列表
+     */
+    deleteMesList(opt) {
+        const { page, typeId } = opt;
+        if (!opt || !page) throw new Error("page为必传的参数，或传入参数不合法");
+        if (!typeId) throw new Error("typeId为必传的参数，或传入参数不合法");
+        Cache.del("messageList");
+        return this.fetch({
+            url: this.env == "test" ? `${this.URL}/data/deletemessageList.json` : `${this.URL}/Api/message/delMessageList`,
+            query: opt
+        });
+    }
+    /******* 电影方面 *******/
+    /*
+     * 搜索电影
+     */
+    movie(opt, options) {
+        options = options || {};
+        let storgeKey;
+        const fetch = () => this.fetch({
+            url: this.env == "test" ? `${this.URL}/data/movieFindOne.json` : `${this.URL}/Api/movie/showMovieList`,
+            query: opt
+        });
+        if (opt.movieId) {
+            storgeKey = opt.id + "moviedetail";
+            Cache.add(storgeKey, fetch, Object.assign({
+                expires: 3 * 24 * 60 * 60 * 1000,
+                sync   : 2,
+                force  : true
+            }, options));
+            return Cache.get(storgeKey);
+        }
+        storgeKey = "movieList";
+        if (opt.page && opt.page != 1) return fetch();
+        Cache.add(storgeKey, fetch, Object.assign({
+            expires: 30 * 60 * 1000,
+            sync   : 2,
+            force  : true
+        }, options));
+        return Cache.get(storgeKey);
+    }
+}

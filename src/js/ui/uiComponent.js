@@ -1,6 +1,4 @@
 /* eslint-disable */
-const $ = require("Zepto");
-
 const dingeUi = {};
 // 选择区域插件
 dingeUi.LArea = (function() {
@@ -1303,5 +1301,4 @@ function objCreat(proto){
     Create.prototype = proto;
     return new Create();
 }
-var tools = $.extend({}, dingeUi);
-module.exports = objCreat(tools);
+module.exports = objCreat(dingeUi);
